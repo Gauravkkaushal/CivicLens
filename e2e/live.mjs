@@ -132,6 +132,16 @@ await step("voice analyst (grounded answers)", async () => {
   }
   const f = await api(`/projects/${pid}/assistant/facts`);
   L(`facts: competitors=${f.body.market?.competitors_found} pop=${f.body.market?.population_in_catchment} baseline_profit=${f.body.baseline?.operating_profit_per_month}`);
+  // The realtime voice brain (Speko LLM + Hinglish TTS) — the same endpoints the voice dock calls.
+  const ag = await api("/assistant/agent", "POST", { messages: [{ role: "user", content: "decisions page kholo" }], page: `/app/projects/${pid}/market`, project_open: true });
+  L(`voice agent [${ag.status}] text=${JSON.stringify(ag.body?.text ?? ag.body).slice(0, 200)} tools=${(ag.body?.tool_calls || []).map((c) => c.name).join(",")}`);
+  if (ag.status !== 200) throw new Error(`voice agent returned ${ag.status}`);
+  const tts = await page.evaluate(async () => {
+    const r = await fetch("/api/v1/assistant/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "Namaste, main Strata hoon." }), credentials: "include" });
+    return { status: r.status, type: r.headers.get("content-type"), bytes: (await r.arrayBuffer()).byteLength };
+  });
+  L(`voice tts [${tts.status}] ${tts.type} ${tts.bytes} bytes`);
+  if (tts.status !== 200 || tts.bytes < 1000) throw new Error(`voice tts returned ${tts.status}, ${tts.bytes} bytes`);
   await page.goto(`${BASE}/app/projects/${pid}/market`);
   await page.waitForTimeout(4000);
   await page.getByRole("button", { name: /Talk to Strata/ }).click();
