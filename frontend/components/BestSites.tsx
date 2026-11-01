@@ -116,7 +116,9 @@ export function BestSites({ projectId, scenarioId, locationKey, onData, onFocus 
         <p className="leading-relaxed text-ink-300">
           I tested your exact plan at {num(data.candidates.length)} spots. {better.length
             ? <>The best is <b className="text-model">{money(data.uplift_profit, { compact: true })}/month better</b> than your current site.</>
-            : <>Your current site is already the best spot in this area.</>} Green glow on the map = more profit; the green pillars are the shortlist.
+            : c.demand >= c.capacity
+              ? <>Location isn&apos;t your limit — capacity is: you already sell out {num(c.capacity)} {data.unit}/month here, so moving can&apos;t earn more. Grow capacity first.</>
+              : <>Your current site is already the best spot in this area.</>} Green glow on the map = more profit; the green pillars are the shortlist.
         </p>
       </div>
       <SiteRow title={`Your site · ${data.location.label}`} s={c} unit={data.unit} base={c} current onFocus={() => onFocus(c.lat, c.lng)} />

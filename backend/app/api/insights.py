@@ -265,8 +265,14 @@ def compare(before: dict, after: dict, unit: str) -> dict:
          f"({'+' if (du or 0) >= 0 else ''}{_n(du)}), and profit {_inr(after.get('month3_profit'))} versus {_inr(before.get('month3_profit'))}. ")
     if after.get("awareness_week12") is not None and before.get("awareness_week12") is not None:
         s += f"Awareness {_pct(before['awareness_week12'])} to {_pct(after['awareness_week12'])}. "
-    if (after.get("turned_away_per_day_last4w") or 0) > 0.08 * max(1, after.get("orders_per_day_last4w") or 1):
+    def sold_out(v):
+        return (v.get("turned_away_per_day_last4w") or 0) > 0.08 * max(1, v.get("orders_per_day_last4w") or 1)
+    if sold_out(after):
         s += f"You are still turning away about {_n(after['turned_away_per_day_last4w'])} {unit} a day. "
+    if sold_out(before) and sold_out(after) and not grow:
+        s += ("You were already selling out, so this can't sell more — it only changes how many people you turn away"
+              + (" and adds cost" if not better else "") + ". Add capacity first; then this becomes worth testing.")
+        return {"delta_units_month3": du, "delta_profit_month3": dp, "grows": grow, "verdict": verdict, "spoken": s}
     s += ("So this strategy grows the business and makes more money." if grow and better else
           "Sales grow, but profit falls — the extra customers cost more than they bring." if grow and not better else
           "Profit improves even though volume doesn't grow." if better else

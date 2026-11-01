@@ -110,6 +110,9 @@ def build_facts(db: Session, p: Project) -> dict:
         row = {
             "name": s.name, "is_baseline": s.is_baseline, "price": res["summary"]["price"],
             "customers_or_units_per_month": round(res["summary"]["units_sold"]),
+            "demand_per_month": round(res["summary"].get("modeled_demand_units") or res["summary"]["units_sold"]),
+            "capacity_per_month": round(res["summary"]["capacity_units"]) if res["summary"].get("capacity_units") else None,
+            "capacity_bound": bool(res["summary"].get("capacity_bound")),
             "people_in_market": round(res["summary"]["in_market_units"]),
             "revenue_per_month": round(fin["revenue"]), "fixed_cost_per_month": round(fin["fixed_cost"]),
             "variable_cost_per_month": round(fin["variable_cost"]),
@@ -213,6 +216,11 @@ def compare_sentence(b: dict | None, w: dict | None, unit: str) -> str:
     s = (f"At {inr(w['price'])} instead of {inr(b['price'])}, the model gives about {num(w['customers_or_units_per_month'])} {unit} a month "
          f"({'+' if du >= 0 else ''}{num(du)} versus baseline) and an operating profit of {inr(w['operating_profit_per_month'])} a month, "
          f"which is {inr(abs(dp))} {better} than the baseline.")
+    if w.get("capacity_bound") and b.get("capacity_bound") and w.get("capacity_per_month"):
+        dd = w["demand_per_month"] - b["demand_per_month"]
+        s += (f" Sales don't move because you already sell out your capacity of about {num(w['capacity_per_month'])} {unit} a month: "
+              f"demand {'rises' if dd > 0 else 'falls' if dd < 0 else 'stays'} from {num(b['demand_per_month'])} to {num(w['demand_per_month'])}, "
+              f"but you can't serve more, so {'a lower price only cuts what you earn on each one' if w['price'] < b['price'] else 'a higher price earns more on each one'}.")
     if w.get("probability_of_loss") is not None and b.get("probability_of_loss") is not None:
         s += f" Modeled chance of a monthly loss goes from {pct(b['probability_of_loss'])} to {pct(w['probability_of_loss'])}."
     return s
@@ -557,9 +565,14 @@ async def ask(project_id: str, body: Ask, user: User = Depends(current_user), db
         if not top:
             return {"answer": "I couldn't find other populated sites inside this catchment to compare.", "intent": intent, "actions": [], "grounded": True}
         t0 = top[0]
-        if t0["profit"] <= cur["profit"]:
-            ans = (f"Your current site is already the best in this catchment by the model: about {num(cur['demand'])} {unit} of demand a month. "
-                   f"The nearest alternative gives {inr(t0['profit'])} versus your {inr(cur['profit'])}.")
+        full = cur["demand"] >= cur["capacity"] and t0["demand"] >= t0["capacity"]
+        if full and abs(t0["profit"] - cur["profit"]) <= 0.01 * max(1, abs(cur["profit"])):
+            ans = (f"Location isn't your constraint — capacity is. Your site and the best alternatives all sell out your {num(cur['capacity'])} {unit} a month, "
+                   f"so they earn the same {inr(cur['profit'])}. Your site has about {num(cur['demand'])} {unit} of demand against "
+                   f"{num(t0['demand'])} at the best alternative, {t0['from_current_km']} kilometres away. Grow capacity before thinking about moving.")
+        elif t0["profit"] <= cur["profit"]:
+            ans = (f"Your current site is already the best in this catchment by the model: about {num(cur['demand'])} {unit} of demand a month "
+                   f"and {inr(cur['profit'])} a month. The runner-up, {t0['from_current_km']} kilometres away, gives {inr(t0['profit'])}.")
         else:
             ans = (f"The best site I found is {t0['from_current_km']} kilometres from yours, with about {num(t0['people_within_1km'])} people within a kilometre "
                    f"and {t0['competitors_within_500m']} competitors within 500 metres. Same plan there: about {num(t0['units'])} {unit} and {inr(t0['profit'])} a month, "
