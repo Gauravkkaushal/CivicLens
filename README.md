@@ -1,117 +1,141 @@
+<div align="center">
+
 # StrataIQ
 
-**Simulate the market. Validate the move.**
+**Test the street. Know if your shop will work, before you sign the lease.**
 
-StrataIQ lets an entrepreneur describe *any* local business, pick *any* searchable place, and test the decision before investing:
-it loads live market evidence (competitors, buildings, population), simulates how synthetic customer segments choose
-between the business, nearby competitors and not buying at all, and turns that into monthly economics, downside risk,
-scenario comparisons and a list of what to verify next.
+An AI-powered geospatial market simulator: describe any local business, pick any place in India, and watch
+10,000 synthetic customers — each with a 615-parameter genome grounded in official data — choose between you,
+your real competitors, and not buying at all.
 
-> Model outputs are estimates under stated assumptions. They are not predictions, guarantees or financial advice.
+[**Live demo**](https://strataiq-rho.vercel.app) · [Methodology](docs/MODEL.md) · [Data sources](docs/DATA_SOURCES.md) · [Architecture](docs/ARCHITECTURE.md) · [Demo script](docs/DEMO.md)
 
-## New in v2
+![StrataIQ landing page](docs/screenshots/landing.jpg)
 
-- **3D market map** — real OpenStreetMap building footprints extruded to height, population as 3D hex columns (WorldPop), competitors as pillars whose height is their modeled customers, demand arcs from synthetic agents to the business they chose (MapLibre + deck.gl, interleaved so buildings and data occlude correctly).
-- **Strata, the voice analyst** — press **V** anywhere. Realtime full-duplex voice (ElevenLabs agent) with client tools that read the live project facts, run what-if prices through the real engine, and navigate the app. Falls back to browser speech (Web Speech API) + a grounded intent router if realtime is unavailable. It never speaks a number that isn't in the project facts or a model run.
-- **Competitors that actually load** — Overpass mirrors are raced in parallel (first non-empty answer wins); if all are busy, the same OpenStreetMap data comes from the Photon index, then Nominatim. The source used is recorded in provenance.
-- **Live landing page** — the hero city queries real OpenStreetMap businesses around Connaught Place, Indiranagar or Bandra in real time.
-- **One-click live demo** — a café near Connaught Place with live competitors and WorldPop population (business inputs are labelled example assumptions), plus guest access so judges skip sign-up.
-- **Serverless-ready** — `SERVERLESS=1` (auto on Vercel) loads market data inside the request, uses a NullPool behind a pooler, and `AUTO_MIGRATE=1` applies migrations on first request. The frontend proxies `/api/*` through a route handler with a 300 s budget.
+</div>
 
-## What works
+> Model outputs are estimates under stated assumptions — not predictions, guarantees or financial advice.
+> Every number on screen is labelled as **observed**, **official aggregate**, **derived**, **assumed** or **simulated**.
 
-| Capability | How |
-|---|---|
-| Any business category | Free text → catalogue match (70+ seed categories) → optional AI tag mapping validated against an allow-list → keyword fallback. Mapped to one of 6 economic model types. |
-| Any place | Nominatim search or drop a pin; radius or travel-time (openrouteservice) catchment |
-| Live evidence with provenance | OpenStreetMap competitors and buildings (Overpass), WorldPop population; retrieval time and source-update time kept separately; coverage indicator from observable signals |
-| Real spending power (India) | Each agent's monthly spend comes from MoSPI HCES 2023-24 curves for its state × rural/urban, placed tile by tile with Meta's Relative Wealth Index (population-weighted with WorldPop) by rank matching. Segment shares, willingness to pay and participation follow the area's real rich/poor mix ([docs/research/REAL_DATA_SOURCES.md](docs/research/REAL_DATA_SOURCES.md)) |
-| Real road distance | Every zone is routed to the site and nearest competitors over OpenStreetMap roads (OSRM), walking and driving; straight-line × circuity only if routing fails, and the run says which |
-| Customer-choice simulation | Vectorised multinomial logit with outside option, lognormal affordability by segment, distance decay, awareness from marketing, capacity limits ([docs/MODEL.md](docs/MODEL.md)) |
-| Uncertainty | Monte Carlo (seeded, reproducible) → P10/P50/P90 profit, modeled P(loss); tornado, price and marketing sweeps, stress tests, break-even thresholds |
-| Agent Genome | 10,000 synthetic agents per run at real population density, **each with a 615-parameter genome** (16 correlated latent traits conditioned on age and income, 46 real-geometry measurements, 553 generated parameters). Every parameter is consumed by the model — audited in tests. [docs/GENOME.md](docs/GENOME.md) |
-| Agent X-ray | Click any agent: its full genome, utility of each option split into 8 channels, and the parameters that pushed it away from you |
-| Market DNA | Agents × 615 parameters heatmap grouped by outcome; what separates your customers from competitors'; where you win and lose |
-| Calibration | Revealed-demand floor from incumbents (bounded, reported, can be disabled) |
-| Real feedback | Field survey kit targeting the assumptions the result is most sensitive to (Van Westendorp pricing, hours, travel, attributes, channels) |
-| Decisions | Rule-based verdict, ranking by goal (profit / low risk / payback / growth), recommendations with reason, uncertainty, what to verify and what would change them |
-| Missing evidence | Add observed or hypothetical competitors, record their prices, exclude records, override population; re-run and see the delta |
-| Reports | Snapshot report with sources, assumptions, scenarios, risks; print to PDF; revocable share links |
-| Monitoring | Record actual monthly outcomes; forecast error and WAPE |
-| Demo mode | One click, fully offline, permanently labelled "DEMO SCENARIO" |
+## The problem
+
+Small entrepreneurs bet their savings on a location with almost no evidence. A map shows *some* competitors, a
+spreadsheet shows margins, a chatbot gives generic advice — none of them explains how **location, affordability,
+competition and price interact** for the people who actually live around the shop. StrataIQ connects all four in one
+workflow and is honest about what it doesn't know.
+
+## How it works
+
+| 1. Define | 2. Discover | 3. Simulate | 4. Decide |
+|---|---|---|---|
+| Any business in plain words ("gym", "pizza shop", "dental clinic") with price, capacity and costs | Live competitors, buildings, roads and population for any searched place | 10,000 synthetic agents choose with a calibrated logit model; Monte Carlo for risk | Ranked scenarios, break-even, P(loss), what to verify next |
+
+## Screenshots
+
+### Live market — 10,000 agents at real population density
+Every red dot is a synthetic customer placed on real WorldPop density. Press play: awareness spreads and agents travel to you or to real OpenStreetMap competitors.
+
+![Live market simulation](docs/screenshots/live-agents.jpg)
+
+### Agent X-ray — why *this* customer chose a competitor
+Click any agent to see its genome, the utility of each option split into channels, and the exact parameters that cost you the sale.
+
+![Agent X-ray](docs/screenshots/agent-xray.jpg)
+
+<table>
+<tr>
+<td width="50%"><b>Simulation Lab</b> — change price, marketing, hours or capacity and rerun the real engine<br><img src="docs/screenshots/simulation-lab.jpg" alt="Simulation lab"></td>
+<td width="50%"><b>Sensitivity</b> — tornado of the assumptions your profit actually depends on<br><img src="docs/screenshots/sensitivity.jpg" alt="Sensitivity analysis"></td>
+</tr>
+<tr>
+<td><b>Market DNA</b> — agents × 615 parameters, and what separates your customers from your competitors'<br><img src="docs/screenshots/market-dna.jpg" alt="Market DNA"></td>
+<td><b>Factor Intelligence Engine</b> — 615 factors across 10 domains, each tagged with where its value comes from<br><img src="docs/screenshots/factor-engine.jpg" alt="Factor engine"></td>
+</tr>
+<tr>
+<td><b>Live competitors</b> — real businesses with observed vs unknown fields and provenance<br><img src="docs/screenshots/live-competitors.jpg" alt="Live competitors"></td>
+<td><b>Decisions</b> — verdict, recommendations, and "what could make this result wrong?"<br><img src="docs/screenshots/decisions.jpg" alt="Decisions page"></td>
+</tr>
+<tr>
+<td><b>New analysis</b> — any searchable place, radius or travel-time catchment<br><img src="docs/screenshots/wizard-location.jpg" alt="Location step"></td>
+<td><b>Feasibility report</b> — shareable, with sources, assumptions and limits<br><img src="docs/screenshots/report.jpg" alt="Report"></td>
+</tr>
+</table>
+
+## What makes it different
+
+- **Real spending power, not guesses.** Each agent's monthly spend comes from MoSPI **HCES 2023-24** consumption deciles for its state × rural/urban, placed tile by tile with Meta's **Relative Wealth Index** (weighted by WorldPop) through percentile rank matching. The area's real rich/poor mix drives willingness to pay and participation. ([details](docs/research/REAL_DATA_SOURCES.md))
+- **Real road distance.** Every population zone is routed to the site and competitors over OpenStreetMap roads (OSRM). If routing fails, the run says so and falls back to straight-line × circuity.
+- **615-parameter Agent Genome.** 16 correlated latent traits conditioned on age and income, 46 real-geometry measurements and 553 generated parameters — every one consumed by the model and audited in tests. ([GENOME.md](docs/GENOME.md))
+- **A defensible model.** Vectorised multinomial logit with an outside option (Huff gravity is a special case), lognormal affordability by segment, distance decay, marketing awareness, capacity limits, seeded Monte Carlo → P10/P50/P90 profit and P(loss). ([MODEL.md](docs/MODEL.md))
+- **Honest about gaps.** Unknown competitor prices stay unknown. Add a competitor you saw on the street, rerun, and see the delta. When data is missing, **field research** sends a mobile survey to someone on the ground; answers flow straight back into the agents.
+- **Voice analyst in Hinglish.** Press **V** anywhere and run the whole app by talking — it navigates, changes the plan and runs the real engine. It never speaks a number that isn't in the project facts or a model run.
+- **LLM never makes numbers.** All money and demand figures come from the tested Python engine; AI text containing a number not present in the model output is discarded.
 
 ## Architecture
 
 ```
-Browser ── Next.js 15 (frontend/, Vercel) ── /api/* rewrite ──► FastAPI (backend/, Render/Docker)
-                                                                  ├─ engine/      numpy choice model, finance, Monte Carlo, sensitivity, decisions
-                                                                  ├─ categories/  archetypes, open taxonomy, resolver
-                                                                  ├─ providers/   Nominatim, Overpass, WorldPop, openrouteservice, Anthropic (optional)
-                                                                  ├─ services/    market snapshots, simulation runs
-                                                                  └─ PostgreSQL + PostGIS (geography columns, GIST indexes, ST_DWithin)
+Browser ── Next.js 15 (frontend/) ── /api/* proxy ──► FastAPI (backend/)
+                                                      ├─ engine/      choice model, ABM, population synthesis, finance,
+                                                      │               Monte Carlo, sensitivity, recommendations, field research
+                                                      ├─ factors/     615-factor intelligence engine with evidence mapping
+                                                      ├─ categories/  open business taxonomy and resolver
+                                                      ├─ providers/   Nominatim, Overpass, Foursquare, WorldPop, OSRM/openrouteservice
+                                                      ├─ data/        HCES 2023-24 tables, India wealth grid
+                                                      └─ PostgreSQL + PostGIS (geography columns, GIST indexes)
 ```
 
-The browser only talks to its own origin; the session is an httpOnly cookie (JWT, bcrypt passwords). All money and demand
-numbers are produced by the tested Python engine. The optional LLM never produces numbers: its category mapping is validated,
-and its explanations are discarded if they contain any number not present in the model output.
-
-More: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [docs/API.md](docs/API.md) · [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) · [docs/DEMO.md](docs/DEMO.md)
+**Stack:** Next.js 15, React 19, TypeScript, Tailwind 4, MapLibre GL + deck.gl (3D) · FastAPI, NumPy/SciPy, SQLAlchemy, Alembic · PostgreSQL + PostGIS · Playwright e2e · GitHub Actions CI.
 
 ## Run locally
 
-### Option A — Docker (everything)
-
 ```bash
-cp .env.example .env      # optional keys: CONTACT_EMAIL, ORS_API_KEY, ANTHROPIC_API_KEY
-docker compose up --build
+cp .env.example .env          # all keys optional
+docker compose up --build     # PostGIS + API + web
 open http://localhost:3000
 ```
 
-### Option B — dev servers
+<details>
+<summary>Without Docker (dev servers)</summary>
 
 ```bash
-# database
 docker compose up -d db
 
-# backend
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 export DATABASE_URL=postgresql://strataiq:strataiq@localhost:5432/strataiq
 alembic upgrade head
-uvicorn app.main:app --reload            # http://localhost:8000/docs
+uvicorn app.main:app --reload             # http://localhost:8000/docs
 
-# frontend (new terminal)
-cd frontend
+cd ../frontend
 npm install
 API_URL=http://localhost:8000 npm run dev  # http://localhost:3000
 ```
+</details>
 
 ## Tests
 
 ```bash
 cd backend
-pytest                       # engine + provider parsing; API flow too when DATABASE_URL points to PostGIS
-RUN_LIVE=1 pytest -m live -s # real calls to OpenStreetMap / WorldPop
+pytest                        # engine, providers, genome, factors, API (with PostGIS)
+RUN_LIVE=1 pytest -m live -s  # real OpenStreetMap / WorldPop calls
 ```
 
-CI (`.github/workflows/ci.yml`) runs lint, migrations up/down/up, the full test suite against a PostGIS service, a live-data
-job, and a typecheck + production build of the frontend.
+CI runs lint, migrations up/down/up, the full test suite against PostGIS, a live-data job, a frontend typecheck +
+production build, and a Playwright judge journey that captures the screenshots above.
 
-## Deploy (public URL)
+## Deployment
 
-Live: **https://strataiq-rho.vercel.app** (frontend, Vercel) → **https://strataiq-api.vercel.app** (FastAPI, Vercel Python, `SERVERLESS=1`, `AUTO_MIGRATE=1`) → Supabase Postgres + PostGIS (schema `strataiq`).
-
-1. **Database — Neon**: create a project, run `CREATE EXTENSION postgis;` in the SQL editor, copy the connection string.
-2. **Backend — Render**: New → Blueprint → this repo (uses `render.yaml`). Set `DATABASE_URL`, `CONTACT_EMAIL`,
-   and optionally `ORS_API_KEY`, `ANTHROPIC_API_KEY`. Migrations run on start. Check `https://<api>/api/health`.
-3. **Frontend — Vercel**: import the repo, root directory `frontend`, env `API_URL=https://<your-render-api>`.
-
-Free Render instances sleep when idle; open `/api/health` a minute before a live demo.
+Frontend and API are both on Vercel (`frontend/` as Next.js, `backend/` as a Python function with `SERVERLESS=1`,
+`AUTO_MIGRATE=1`), backed by Postgres + PostGIS. `render.yaml` and the Dockerfiles are included for a long-running
+container deploy instead. Set `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGINS` and optionally `CONTACT_EMAIL`,
+`ORS_API_KEY`, `SPEKO_API_KEY` (voice) and an LLM key (see `.env.example`).
 
 ## Data and licences
 
 Map data © OpenStreetMap contributors (ODbL) · Population © WorldPop, University of Southampton (CC BY 4.0) ·
 Consumption © MoSPI HCES 2023-24 · Relative Wealth Index © Meta Data for Good / Chi et al. 2022 (CC BY-NC 4.0, non-commercial) ·
-State boundaries © geoBoundaries (CC BY 4.0) · Routing © OSRM / FOSSGIS ·
-Tiles © OpenFreeMap / OpenMapTiles · Routing © openrouteservice by HeiGIT. Contributor usernames from OSM are discarded.
+State boundaries © geoBoundaries (CC BY 4.0) · Routing © OSRM / FOSSGIS, openrouteservice by HeiGIT ·
+Tiles © OpenFreeMap / OpenMapTiles. OSM contributor usernames are discarded.
+
+Code under the [MIT License](LICENSE).
