@@ -518,6 +518,8 @@ def run_abm(arch: Archetype, zones: list[Zone], comps: list[Competitor], biz: Bu
     dow = dow / dow.mean()
     in_idx = np.where(in_market)[0]
     cap_units_day = arch.capacity_units(biz.capacity) / 30.0 if not membership else None
+    # own stream: two strategies that both sell out get identical staffing days, so the comparison isn't noise
+    staffing = np.clip(np.random.default_rng(seed + 307).normal(0.97, 0.03, days), 0.85, 1.0)
 
     for day in range(days):
         cust_zone = np.bincount(zi[purchases_you > 0], weights=wom_send[purchases_you > 0], minlength=len(zones)).astype(float)
@@ -586,7 +588,7 @@ def run_abm(arch: Archetype, zones: list[Zone], comps: list[Competitor], biz: Bu
             exp_comp = scale * float(w @ pr[:, 1:J].sum(1)) if in_idx.size and J > 1 else 0.0
             exp_none = scale * float(w @ pr[:, J]) if in_idx.size else 0.0
             orders = float(rng.poisson(exp_you)) if exp_you < 1e7 else exp_you  # day-to-day randomness of real orders
-            served = min(orders, cap_units_day * float(np.clip(rng.normal(0.97, 0.03), 0.85, 1.0)))  # staffing / rush days: never above the stated limit
+            served = min(orders, cap_units_day * float(staffing[day]))  # staffing / rush days: never above the stated limit
             turned = orders - served
             # agent-level events (who buys, from whom) drive habits, word of mouth and the dots on the map
             buyers = np.where(in_market & (rng.random(N) < freq / 30.0 * m_day))[0]

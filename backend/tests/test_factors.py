@@ -45,6 +45,16 @@ def test_abm_higher_price_fewer_customers():
     assert lo["monthly_units"][-1] > hi["monthly_units"][-1]
 
 
+def test_abm_sold_out_more_ads_cannot_lose_sales():
+    # Both runs sell out every day, so served orders must match exactly (staffing noise is shared, not marketing-dependent).
+    arch = ARCHETYPES["takeaway"]
+    cap = {"max_orders_per_day": 20, "open_days_per_month": 30}
+    a = run_abm(arch, make_zones(), make_comps(), biz(price=300, capacity=cap, marketing_spend=20000), ResolvedParams.from_archetype(arch), 400, n_agents=3000, days=42)
+    b = run_abm(arch, make_zones(), make_comps(), biz(price=300, capacity=cap, marketing_spend=40000), ResolvedParams.from_archetype(arch), 400, n_agents=3000, days=42)
+    assert a["monthly_units"][-1] <= 20 * 30 + 1e-6
+    assert b["monthly_units"][-1] == a["monthly_units"][-1]
+
+
 def test_factor_values_never_invent_reserved_factors():
     arch = ARCHETYPES["membership"]
     zones = make_zones(60000)

@@ -179,7 +179,7 @@ function VoiceDockInner() {
             `/api/v1/projects/${pid}/sites${sc?.scenario_id ? `?scenario_id=${sc.scenario_id}` : ""}`);
           if (!pathRef.current.endsWith("/market")) router.push(`/app/projects/${pid}/market?tab=sites`);
           setTimeout(() => window.dispatchEvent(new CustomEvent("strataiq:sites")), 600);
-          const slim = (x: Record<string, unknown>) => ({ profit_per_month: x.profit, demand: x.demand, units: x.units, from_current_km: x.from_current_km,
+          const slim = (x: Record<string, unknown>) => ({ profit_per_month: x.profit, demand: x.demand, units: x.units, capacity: x.capacity, from_current_km: x.from_current_km,
             people_within_1km: x.people_within_1km, competitors_within_500m: x.competitors_within_500m, nearest_competitor_km: x.nearest_competitor_km, risk: x.risk });
           return JSON.stringify({ unit: out.unit, current_site: slim(out.current), best_sites: out.top.slice(0, 3).map(slim), uplift_profit_per_month: out.uplift_profit,
             note: out.method, shown_on: "Market map > Best sites (green pillars); the user can click 'Open this site & simulate'" });

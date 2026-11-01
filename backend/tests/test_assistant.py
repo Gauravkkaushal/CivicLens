@@ -82,3 +82,18 @@ def test_insights_flag_capacity_and_awareness():
     better = dict(v, month3_units=4500, month3_profit=4e5)
     c = compare(v, better, "orders")
     assert c["grows"] and c["verdict"] == "better"
+
+
+def test_sold_out_answers_explain_capacity():
+    from app.api.assistant import compare_sentence
+    from app.api.insights import compare
+    v = {"month3_units": 6600, "month3_profit": 600000, "orders_per_day_last4w": 214, "turned_away_per_day_last4w": 559}
+    more_ads = dict(v, month3_profit=560000, turned_away_per_day_last4w=612)
+    c = compare(v, more_ads, "orders")
+    assert c["verdict"] == "worse" and "already selling out" in c["spoken"] and "Add capacity" in c["spoken"]
+    b = {"price": 450, "customers_or_units_per_month": 6600, "operating_profit_per_month": 624000, "demand_per_month": 7160,
+         "capacity_per_month": 6600, "capacity_bound": True}
+    w = dict(b, price=300, operating_profit_per_month=-366000, demand_per_month=8900)
+    s = compare_sentence(b, w, "orders")
+    assert "sell out your capacity" in s and "a lower price only cuts" in s
+    assert "sell out" not in compare_sentence(dict(b, capacity_bound=False), dict(w, capacity_bound=False), "orders")
