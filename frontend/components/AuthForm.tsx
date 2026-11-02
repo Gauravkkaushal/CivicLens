@@ -46,7 +46,8 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
         return;
       }
       const next = params.get("next");
-      router.push(next && next.startsWith("/") ? next : mode === "sign-up" ? "/onboarding" : "/app");
+      const safeNext = next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : null;
+      router.push(safeNext ?? (mode === "sign-up" ? "/onboarding" : "/app"));
       router.refresh();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong");
@@ -71,7 +72,8 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
         return;
       }
       const next = params.get("next");
-      router.push(next && next.startsWith("/") ? next : "/app");
+      const safeNext = next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : null;
+      router.push(safeNext ?? "/app");
       router.refresh();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong");

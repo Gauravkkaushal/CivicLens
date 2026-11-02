@@ -149,10 +149,10 @@ function runSentence(o: Record<string, unknown>): string {
 }
 
 // the last strategy we suggested, so "ye test karo" knows what "ye" is
-let lastSuggestion: Record<string, number> | null = null;
+let lastSuggestion: { projectId: string | null; values: Record<string, number> } | null = null;
 
 /** Try to handle the request locally. `say` speaks an interim line for slow tools. */
-export async function route(qRaw: string, t: Tools, ctx: { projectOpen: boolean; say: (s: string) => void }): Promise<string | null> {
+export async function route(qRaw: string, t: Tools, ctx: { projectOpen: boolean; projectId?: string | null; say: (s: string) => void }): Promise<string | null> {
   const q = qRaw.trim();
   const call = async (name: string, args?: Record<string, unknown>) => parse(await (t[name] as (a?: Record<string, unknown>) => Promise<string>)(args));
   const needProject = "Iske liye pehle ek project kholo — bolo 'mere projects dikhao' ya apna idea batao, jaise 'Indiranagar me café kholna hai'.";
@@ -194,10 +194,10 @@ export async function route(qRaw: string, t: Tools, ctx: { projectOpen: boolean;
   }
 
   // 2b. run the strategy we just suggested
-  if (lastSuggestion && /\b(ye|yeh|isko|isse|wo|woh|this|it|that|suggestion)\b.*\b(test|try|chalao|apply|lagao|run)\b|\b(test|try|apply|run|chalao)\s+(it|this|that|ye|yeh|karo)\b|^(haan|ha|yes|ok|okay)\b.*\b(test|karo|chalao)\b/i.test(q)) {
+  if (lastSuggestion && (!lastSuggestion.projectId || lastSuggestion.projectId === ctx.projectId) && /\b(ye|yeh|isko|isse|wo|woh|this|it|that|suggestion)\b.*\b(test|try|chalao|apply|lagao|run)\b|\b(test|try|apply|run|chalao)\s+(it|this|that|ye|yeh|karo)\b|^(haan|ha|yes|ok|okay)\b.*\b(test|karo|chalao)\b/i.test(q)) {
     if (!ctx.projectOpen) return needProject;
     ctx.say("Theek hai, ye strategy das hazaar agents pe chala raha hoon.");
-    const o = await call("test_strategy", lastSuggestion);
+    const o = await call("test_strategy", lastSuggestion.values);
     if (o.error) return `Simulation nahi chal payi: ${o.error}`;
     return `Live map pe chala diya. ${o.spoken || ""}`.trim();
   }
@@ -237,10 +237,10 @@ export async function route(qRaw: string, t: Tools, ctx: { projectOpen: boolean;
     if (o.error) return `Optimizer nahi chal paya: ${o.error}`;
     const b = o.best || {};
     const c = o.current || {};
-    lastSuggestion = Object.fromEntries(
+    const vals = Object.fromEntries(
       (["price", "marketing_spend", "capacity_scale"] as const).filter((k) => b[k] !== undefined && b[k] !== c[k]).map((k) => [k, Number(b[k])]),
     );
-    if (!Object.keys(lastSuggestion).length) lastSuggestion = null;
+    lastSuggestion = Object.keys(vals).length ? { projectId: ctx.projectId ?? null, values: vals } : null;
     return `${num(o.combinations_tested)} combinations me sabse zyada profit: price ${inr(b.price)}, marketing ${inr(b.marketing_spend)} mahina` +
       (b.capacity_scale && b.capacity_scale !== 1 ? `, capacity ${Math.round((b.capacity_scale - 1) * 100)}% zyada` : "") +
       `. Isse ${pm(b.profit_per_month)}, jabki abhi ${pm(c.profit_per_month)}. Bolo 'ye test karo' to main isse das hazaar agents pe chala ke verify karta hoon.`;
@@ -292,9 +292,11 @@ export async function route(qRaw: string, t: Tools, ctx: { projectOpen: boolean;
     await call("navigate", { page: "dashboard" });
     return `Aapke ${o.length} projects hain: ${o.slice(0, 5).map((p: { name: string }) => p.name).join(", ")}. Kaunsa kholu?`;
   }
-  const projName = q.match(/^(.+?)\s+(wala\s+)?project\s+(kholo|khol do|open)/i) || q.match(/\bopen\s+(the\s+)?(.+?)\s+project\b/i);
+  const hi = q.match(/^(.+?)\s+(?:wala\s+)?project\s+(?:kholo|khol do|open)/i);
+  const en = hi ? null : q.match(/\bopen\s+(?:the\s+)?(.+?)\s+project\b/i);
+  const projName = hi || en;
   if (projName) {
-    const name = (projName[2] && projName[2] !== "the " ? projName[2] : projName[1]).trim();
+    const name = projName[1].trim();
     const o = await call("open_project", { name });
     return o.opened ? `${o.opened} khol diya.` : `"${name}" naam ka project nahi mila. Aapke projects: ${(o.projects || []).slice(0, 5).join(", ")}.`;
   }

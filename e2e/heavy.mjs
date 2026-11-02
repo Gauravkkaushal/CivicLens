@@ -17,7 +17,11 @@ const plan = (await call("/quickstart/plan", "POST", { text: idea })).body;
 console.log("plan:", plan.category?.label, "|", plan.place?.display_name, "| ready", plan.ready);
 const p = (await call("/quickstart/create", "POST", { plan })).body;
 const loc = p.locations[0].id;
-const snap = (await call(`/projects/${p.id}/locations/${loc}/refresh`, "POST")).body;
+let snap = (await call(`/projects/${p.id}/locations/${loc}/refresh`, "POST")).body;
+for (let i = 0; i < 120 && snap.status === "loading"; i++) {
+  await new Promise((r) => setTimeout(r, 2500));
+  snap = (await call(`/projects/${p.id}/snapshots/${snap.id}`)).body;
+}
 console.log("snapshot:", snap.status, "errors", JSON.stringify(snap.errors || []).slice(0, 300));
 const proj = (await call(`/projects/${p.id}`)).body;
 const sc = proj.scenarios[0];

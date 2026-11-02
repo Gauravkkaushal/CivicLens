@@ -1,4 +1,4 @@
-# CivicLens Empirical Validation & Baseline Benchmarking Report
+# CivicLens Synthetic Identification Check & Baseline Benchmarking Report
 
 **Module:** `backend/tests/test_validation_benchmarks.py`  
 **Date:** October 2026  
@@ -53,7 +53,9 @@ $$P_{zsj} = \frac{F_{sj} \exp(V_{zsj}) \mathbf{1}_{\{d_{zj} \le \text{reach}_{s}
 ## 3. Empirical Evaluation & Quantitative Results
 
 ### 3.1 Data Generating Process (DGP)
-To avoid circular or tautological benchmarking (e.g. testing CivicLens against its own output with noise), the ground truth is generated via an independent **Micro-Agent Discrete Choice Simulation**:
+The synthetic ground truth is generated via discrete agent sampling from the underlying choice probabilities:
+- The DGP draws agent choices directly from CivicLens's segmented probability matrix `P_matrix` with outside option.
+- This serves as a **synthetic identification check**, proving that classical baselines lacking segmentation or outside options cannot identify or replicate the true parameter structure, even with zero specification error.
 - $N = 20,000$ individual consumer agents are sampled across demand zones proportional to residential population.
 - Each agent is assigned to a socio-economic segment $s \in \{\text{Budget}, \text{Mainstream}, \text{Premium}\}$.
 - Individual agents draw utilities across all reachable alternatives and the outside option ($U_0$).

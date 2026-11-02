@@ -101,6 +101,8 @@ class Cache:
             with self.session_factory() as db:
                 row = db.get(ProviderCache, key)
                 if row and row.expires_at > now:
+                    if len(_MEM_CACHE) >= 500:
+                        _MEM_CACHE.pop(next(iter(_MEM_CACHE)), None)
                     _MEM_CACHE[key] = (row.payload, row.fetched_at, row.expires_at)
                     return row.payload, row.fetched_at
         except Exception as e:
@@ -109,6 +111,8 @@ class Cache:
 
     def put(self, key: str, provider: str, payload: dict, ttl: timedelta) -> None:
         now = datetime.now(timezone.utc)
+        if len(_MEM_CACHE) >= 500:
+            _MEM_CACHE.pop(next(iter(_MEM_CACHE)), None)
         _MEM_CACHE[key] = (payload, now, now + ttl)
 
         if not self.session_factory:

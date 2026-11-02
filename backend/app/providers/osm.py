@@ -155,7 +155,7 @@ def parse_building_centers(data: dict) -> list[tuple[float, float]]:
 async def _overpass_one(url: str, query: str, timeout_s: float) -> dict:
     host = url.split("/")[2]
     try:
-        r = await client().post(url, data={"data": query}, timeout=httpx.Timeout(min(timeout_s, 6.0), connect=3.0))
+        r = await client().post(url, data={"data": query}, timeout=httpx.Timeout(timeout_s, connect=3.0))
     except httpx.HTTPError as e:
         raise ProviderError("overpass", f"{host}: {type(e).__name__}") from e
     if r.status_code != 200:

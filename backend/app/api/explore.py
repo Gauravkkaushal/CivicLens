@@ -12,7 +12,7 @@ from ..categories.archetypes import ARCHETYPES, get_archetype
 from ..db import get_db, session_factory
 from ..engine import model as em
 from ..engine.explore import optimize, site_scan
-from ..models import CandidateLocation, Project, Scenario, User, utcnow
+from ..models import CandidateLocation, Project, Scenario, SimulationRun, User, utcnow
 from ..providers.http import ProviderError
 from ..security import current_user, owned_project
 from ..services.runs import competitors_for, execute_run, latest_runs, latest_snapshot, point_wkt, refresh_snapshot
@@ -20,6 +20,13 @@ from .insights import compare, run_view
 
 router = APIRouter(tags=["explore"])
 LOCATION_LABELS = [f"Location {c}" for c in "ABCDE"]
+
+
+def _run_sync(project_id: str, scenario_id: str) -> str:
+    with session_factory()() as db:
+        p = db.get(Project, project_id)
+        s = db.get(Scenario, scenario_id)
+        return execute_run(db, p, s).id
 
 
 def _scenario(p: Project, scenario_id: str | None) -> Scenario:
@@ -106,14 +113,19 @@ async def _adopt(project_id: str, body: dict) -> dict:
         except ProviderError as e:
             raise HTTPException(502, f"Market data could not be loaded for the new site: {e.message[:160]}") from e
         runs = latest_runs(db, p)
-        r0 = runs.get(src.id) or execute_run(db, p, src)
+        if src.id not in runs:
+            await run_in_threadpool(_run_sync, p.id, src.id)
+            runs = latest_runs(db, p)
+        r0 = runs[src.id]
         s = Scenario(project_id=p.id, location_id=loc.id, name=f"{src.name} at {label}"[:120], is_baseline=False, inputs=copy.deepcopy(src.inputs))
         db.add(s)
         p.updated_at = utcnow()
         db.commit()
-        run = execute_run(db, p, s)
-        if run.status != "succeeded":
-            raise HTTPException(422, run.error or "Simulation failed")
+        run_id = await run_in_threadpool(_run_sync, p.id, s.id)
+        db.expire_all()
+        run = db.get(SimulationRun, run_id)
+        if run is None or run.status != "succeeded":
+            raise HTTPException(422, (run.error if run else None) or "Simulation failed")
         unit = ARCHETYPES[p.category["archetype"]].unit_label
         before, after = run_view(r0.results), run_view(run.results)
         return {"location": {"id": loc.id, "label": label, "lat": loc.lat, "lng": loc.lng}, "scenario": {"id": s.id, "name": s.name},

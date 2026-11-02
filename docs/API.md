@@ -4,7 +4,8 @@ Base path `/api/v1`. Interactive docs at `/docs` on the backend. Auth: httpOnly 
 signup/login; `Authorization: Bearer` is also accepted. Every project-scoped route checks ownership and returns **404**
 for other users' resources. Validation errors return `422 {"detail":"Validation failed","errors":[{field,message}]}`.
 Provider failures return `502` with a readable message; failed simulations return `422` with `{message, run_id}` — never
-a success with placeholder numbers. All routes are synchronous request/response; market refresh can take up to ~60 s.
+a success with placeholder numbers. `POST .../refresh` starts a background job and returns `202` with a `loading`
+snapshot; poll `GET /projects/{id}/snapshots/{sid}` (or pass `?wait=true` to block until it finishes).
 
 | Method | Path | Notes |
 |---|---|---|

@@ -10,6 +10,7 @@ from .. import ai
 from ..categories.archetypes import ARCHETYPES
 from ..db import get_db
 from ..engine.recommend import decide
+from ..engine.schemes import match_government_schemes
 from ..models import ActualOutcome, Competitor, Project, Report, User, utcnow
 from ..schemas import OutcomeIn
 from ..security import current_user, owned_project
@@ -62,23 +63,49 @@ def _report_content(db: Session, p: Project) -> dict:
     d = _decision(db, p, None)
     runs = latest_runs(db, p)
     locs = []
+    settlement_type = None
     for l in p.locations:
         snap = latest_snapshot(db, l.id)
+        if snap and snap.population:
+            settlement_type = settlement_type or snap.population.get("settlement_type")
         locs.append({"location": location_out(l), "snapshot": None if not snap else {
             "retrieved_at": iso(snap.retrieved_at), "status": snap.status, "catchment_method": snap.catchment_method,
             "population": snap.population, "coverage": snap.coverage, "sources": snap.sources, "errors": snap.errors,
             "catchment_geojson": snap.catchment_geojson}})
     comps = [competitor_out(c) for c in db.scalars(select(Competitor).where(Competitor.project_id == p.id))]
     scen = []
+    baseline_scenario = None
     for s in p.scenarios:
+        if s.is_baseline:
+            baseline_scenario = s
         r = runs.get(s.id)
         scen.append({"scenario": scenario_out(s, r), "result": None if not r else {
             k: r.results.get(k) for k in ("summary", "finance", "monte_carlo", "segments", "parameters", "limitations", "drivers", "model_version")
         } | {"sensitivity": {k: (r.results.get("sensitivity") or {}).get(k) for k in ("tornado", "stress_tests", "thresholds", "price_curve")}}})
+    if not baseline_scenario and p.scenarios:
+        baseline_scenario = p.scenarios[0]
+
+    startup_cost = 0.0
+    if baseline_scenario and baseline_scenario.inputs:
+        startup_cost = float(baseline_scenario.inputs.get("startup_cost") or 0.0)
+    elif p.profile and p.profile.get("setup_cost"):
+        startup_cost = float(p.profile.get("setup_cost") or 0.0)
+
+    cat_key = (p.category or {}).get("key", "")
+    arch_key = (p.category or {}).get("archetype", "")
+    schemes = match_government_schemes(
+        category_key=cat_key,
+        archetype=arch_key,
+        startup_cost=startup_cost,
+        is_new=(p.objective == "start_new"),
+        settlement_type=settlement_type,
+    )
+
     return {"generated_at": utcnow().isoformat(), "project": {"name": p.name, "objective": p.objective, "decision_goal": p.decision_goal,
             "category": p.category, "profile": p.profile, "is_demo": p.is_demo},
             "archetype": ARCHETYPES[p.category["archetype"]].to_public(), "locations": locs, "competitors": comps,
             "scenarios": scen, "decision": d,
+            "government_schemes": schemes,
             "disclaimer": "This report contains model estimates under stated assumptions. It is not a guarantee of business success, and it is not financial advice."}
 
 

@@ -530,6 +530,8 @@ function VoiceDockInner() {
         if (wantRec.current) {
           setPhase("listening");
           setTimeout(startRec, 150);
+        } else {
+          setPhase("idle");
         }
         return;
       }
@@ -556,6 +558,8 @@ function VoiceDockInner() {
       if (wantRec.current) {
         setPhase("listening");
         setTimeout(startRec, 150);
+      } else {
+        setPhase("idle");
       }
     },
     [playSpeko, startRec],
@@ -692,7 +696,7 @@ function VoiceDockInner() {
           push("civiclens", line);
           void speak(line);
         };
-        const ans = await route(q, tools as unknown as Tools, { projectOpen: !!pidRef.current, say });
+        const ans = await route(q, tools as unknown as Tools, { projectOpen: !!pidRef.current, projectId: pidRef.current ?? null, say });
         if (ans) {
           push("civiclens", ans);
           await speak(ans);

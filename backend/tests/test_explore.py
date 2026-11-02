@@ -50,3 +50,10 @@ def test_quickstart_reads_english_and_hinglish():
     assert p["place"] == "Indiranagar, Bengaluru" and p["price"] == 250 and p["budget"] == 2_000_000
     h = parse_idea("Mujhe Koramangala mein ek pizza shop kholna hai")
     assert h["place"] == "Koramangala" and "pizza" in h["business"]
+
+def test_optimizer_handles_unrounded_price():
+    arch, zones, comps, biz = _market()
+    biz.price = 399.0
+    out = optimize(arch, zones, comps, biz, ResolvedParams.from_archetype(arch))
+    assert out['current']['price'] == 399.0
+

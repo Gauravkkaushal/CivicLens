@@ -2,6 +2,18 @@
 import { money, num, pct, when } from "@/lib/format";
 import type { CompetitorRec, Decision, Scenario, SimResult, Snapshot, Location, Archetype, Category } from "@/lib/types";
 
+export interface GovernmentSchemeMatch {
+  id: string;
+  name: string;
+  ministry: string;
+  type: string;
+  benefit: string;
+  portal_url: string;
+  match_reason: string;
+  eligibility_summary: string;
+  documents_needed: string[];
+}
+
 export interface ReportContent {
   generated_at: string;
   project: { name: string; objective: string; decision_goal: string; category: Category; profile: Record<string, unknown>; is_demo: boolean };
@@ -10,6 +22,7 @@ export interface ReportContent {
   competitors: CompetitorRec[];
   scenarios: { scenario: Scenario; result: Partial<SimResult> | null }[];
   decision: Decision;
+  government_schemes?: GovernmentSchemeMatch[];
   disclaimer: string;
 }
 
@@ -50,7 +63,7 @@ export function ReportView({ c }: { c: ReportContent }) {
     <article className="print-light mx-auto max-w-4xl rounded-lg border border-black/[0.07] bg-ink-950 p-6 text-sm leading-relaxed text-ink-200 md:p-10">
       {c.project.is_demo && <div className="mb-4 rounded border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-800">DEMO SCENARIO — Illustrative market data; not verified live conditions.</div>}
       <header>
-        <div className="text-xsst text-ink-400">CivicLens feasibility report</div>
+        <div className="text-xs text-ink-400">CivicLens feasibility report</div>
         <h1 className="mt-1 text-2xl font-semibold text-ink-100">{c.project.name}</h1>
         <p className="mt-1 text-xs text-ink-400">Generated {when(c.generated_at)} · model {d.model_version || "—"}</p>
         <p className="mt-3 rounded border border-black/[0.07] bg-ink-900 p-3 text-xs text-ink-300">{c.disclaimer}</p>
@@ -146,7 +159,56 @@ export function ReportView({ c }: { c: ReportContent }) {
         </ul>
       )}
 
-      <H n={12}>Methodology and limitations</H>
+      <H n={12}>Applicable government schemes and financial incentives</H>
+      <p className="mb-3 text-xs text-ink-300">
+        Based on your business sector (<b>{c.project.category.label}</b>), setup profile, and location, the following Government of India / MSME schemes may be applicable for capital subsidies, collateral-free credit, or interest subvention:
+      </p>
+      {(!c.government_schemes || c.government_schemes.length === 0) ? (
+        <p className="text-xs text-ink-400">No specific sector scheme mapped. Standard MSME Udyam registration is recommended for statutory benefits and priority sector lending.</p>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {c.government_schemes.map((s) => (
+            <div key={s.id} className="rounded border border-black/[0.08] bg-ink-900 p-3.5 text-xs space-y-2 shadow-xs">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <span className="inline-block rounded bg-primary-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-700">
+                    {s.type}
+                  </span>
+                  <h3 className="mt-1 font-semibold text-ink-100">{s.name}</h3>
+                  <div className="text-[11px] text-ink-400">{s.ministry}</div>
+                </div>
+              </div>
+
+              <div className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 text-xs font-medium text-emerald-900">
+                💰 {s.benefit}
+              </div>
+
+              <p className="text-ink-300"><b>Why it matches:</b> {s.match_reason}</p>
+              <p className="text-[11px] text-ink-400">{s.eligibility_summary}</p>
+
+              {s.documents_needed && s.documents_needed.length > 0 && (
+                <div className="border-t border-black/[0.06] pt-1.5 text-[11px] text-ink-400">
+                  <span className="font-medium text-ink-300">Key documents: </span>
+                  {s.documents_needed.join(", ")}
+                </div>
+              )}
+
+              <div className="pt-1">
+                <a
+                  href={s.portal_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary-600 hover:underline"
+                >
+                  Official Portal &rarr;
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <H n={13}>Methodology and limitations</H>
       <p>Demand is estimated with a multinomial-logit customer-choice model over synthetic customer segments placed on a population grid, with an outside option, lognormal affordability, distance decay and capacity limits. Uncertainty is propagated by Monte Carlo over documented parameter ranges. Default behaviour parameters are not calibrated against observed sales; no accuracy figure is claimed. See /methodology for formulas.</p>
       <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-ink-300">{(ran[0]?.result?.limitations || []).map((l) => <li key={l}>{l}</li>)}</ul>
       <p className="mt-6 text-[11px] text-ink-500">Map data © OpenStreetMap contributors (ODbL). Population © WorldPop (CC BY 4.0).</p>

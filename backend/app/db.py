@@ -24,7 +24,7 @@ def get_engine():
             # short-lived instances behind a connection pooler: no client-side pool, no server-side prepared statements
             _engine = create_engine(s.sqlalchemy_url, poolclass=NullPool, connect_args={"prepare_threshold": None})
         else:
-            _engine = create_engine(s.sqlalchemy_url, pool_pre_ping=False, pool_recycle=300, pool_size=10, max_overflow=10)
+            _engine = create_engine(s.sqlalchemy_url, pool_pre_ping=True, pool_recycle=300, pool_size=10, max_overflow=10)
         _SessionLocal = sessionmaker(bind=_engine, autoflush=False, expire_on_commit=False)
     return _engine
 

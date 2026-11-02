@@ -9,6 +9,7 @@ import math
 
 import numpy as np
 from fastapi import APIRouter, Depends
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 
 from ..categories.resolver import from_taxonomy_key
@@ -110,7 +111,7 @@ async def create_live_demo(spot: str = "cp-delhi", kind: str = "cafe", user: Use
     """A real-data demo: live OpenStreetMap competitors + WorldPop population around a real street.
     Only the business inputs (price, rent, payroll…) are example assumptions, and they are labelled as such."""
     from ..config import get_settings
-    from ..services.runs import execute_run, refresh_snapshot, start_refresh
+    from ..services.runs import refresh_snapshot, start_refresh
     label, lat, lng = LIVE_SPOTS.get(spot, LIVE_SPOTS["cp-delhi"])
     k = LIVE_KINDS.get(kind, LIVE_KINDS["cafe"])
     cat = from_taxonomy_key(k["key"], k["key"]).as_dict()
@@ -134,7 +135,9 @@ async def create_live_demo(spot: str = "cp-delhi", kind: str = "cafe", user: Use
         try:
             await refresh_snapshot(db, p, loc)
             db.refresh(p)
-            execute_run(db, p, next(s for s in p.scenarios if s.is_baseline))
+            base_s = next(s for s in p.scenarios if s.is_baseline)
+            from .scenarios import _run_sync
+            await run_in_threadpool(_run_sync, p.id, base_s.id)
         except Exception:  # the market page shows what failed and offers a retry
             db.rollback()
         db.refresh(p)
