@@ -33,7 +33,7 @@ from ..engine.geo import haversine_km
 from .decisions import _decision
 
 router = APIRouter(tags=["assistant"])
-log = logging.getLogger("strataiq.assistant")
+log = logging.getLogger("civiclens.assistant")
 
 
 # ---------------------------------------------------------------- formatting
@@ -517,7 +517,7 @@ def explain_term(q: str) -> str:
     return "Ask me about any word on the screen — catchment, break-even, P10, awareness, capacity, payback — and I'll explain it simply."
 
 
-GENERAL = ("StrataIQ lets you test a business before you invest. Pick any business and any place in India or the world. "
+GENERAL = ("CivicLens lets you test a business before you invest. Pick any business and any place in India or the world. "
            "It loads real competitors from OpenStreetMap and real population from WorldPop, then simulates ten thousand synthetic customers "
            "choosing between you, your competitors, or nothing, and turns that into profit, risk and break-even. "
            "Start with 'Simulate your business', or open the live demo.")
@@ -655,7 +655,7 @@ async def ask(project_id: str, body: Ask, user: User = Depends(current_user), db
         return {"answer": text, "intent": intent, "actions": actions, "grounded": True}
     # Open question: let the LLM phrase an answer from the fact sheet, but only keep it if every number is grounded.
     if ai.enabled():
-        sys = ("You are StrataIQ's voice analyst for an Indian small-business owner. Answer in 2-4 short spoken sentences, "
+        sys = ("You are CivicLens's voice analyst for an Indian small-business owner. Answer in 2-4 short spoken sentences, "
                "in natural Hinglish written in Roman script (switch to plain English only if the user wrote pure English). Use ONLY facts and numbers in the JSON. "
                "If the JSON does not contain the answer, say what you can't tell and what to check. Money in rupees, Indian style (lakh/crore).")
         resp = await ai._call(sys, f"Facts: {json.dumps(f, default=str)[:9000]}\n\nQuestion: {q}", None, 300)

@@ -43,7 +43,7 @@ constraints & context (50).
 
 ## Calibration against incumbents (revealed demand)
 
-Businesses that exist and survive need customers. Before the run, StrataIQ simulates the market **without** you and
+Businesses that exist and survive need customers. Before the run, CivicLens simulates the market **without** you and
 measures the demand reaching incumbents in the inner catchment (≤60% of the radius). If the median incumbent is below a
 survival floor (default 40% of the category's default capacity), participation is scaled up, bounded at ×2.5, and the
 adjustment is reported on the run. It never lowers demand. Disable with `param_overrides.calibrate_incumbents = 0`.

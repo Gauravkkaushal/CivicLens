@@ -104,12 +104,12 @@ const kindTitle: Record<EvidenceKind, string> = {
   observed: "Observed in a data source (e.g. OpenStreetMap)",
   user: "Entered by you; not independently verified",
   assumption: "Model assumption with a documented range",
-  model: "Estimated by the StrataIQ simulation",
+  model: "Estimated by the CivicLens simulation",
   demo: "Illustrative demo data, not real",
   unknown: "Not available from any source",
   official: "Official modelled estimate (e.g. WorldPop)",
   ai: "Written by an AI model from the computed results",
-  field: "Collected on the ground by a StrataIQ field researcher",
+  field: "Collected on the ground by a CivicLens field researcher",
 };
 
 export function Evidence({ kind, label, className, title }: { kind: EvidenceKind; label?: string; className?: string; title?: string }) {

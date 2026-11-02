@@ -26,7 +26,7 @@ from ..providers import routing as rt
 from ..providers.http import Cache, ProviderError
 from .market import build_snapshot
 
-log = logging.getLogger("strataiq.runs")
+log = logging.getLogger("civiclens.runs")
 
 
 def point_wkt(lat: float, lng: float) -> str:

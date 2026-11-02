@@ -18,7 +18,7 @@ export default function Methodology() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-ink-100">Methodology and data quality</h1>
           <p className="mt-3 text-ink-300">
-            StrataIQ does not know every customer or every business in a city. It combines the best available public evidence with explicit behavioural and
+            CivicLens does not know every customer or every business in a city. It combines the best available public evidence with explicit behavioural and
             financial models, so that every assumption is visible and can be changed. Results are conditional model estimates, not predictions or guarantees.
           </p>
         </div>

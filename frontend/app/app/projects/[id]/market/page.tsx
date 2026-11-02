@@ -31,8 +31,8 @@ export default function MarketPage() {
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("tab") === "sites") setTab("sites");
     const h = () => setTab("sites");
-    window.addEventListener("strataiq:sites", h);
-    return () => window.removeEventListener("strataiq:sites", h);
+    window.addEventListener("civiclens:sites", h);
+    return () => window.removeEventListener("civiclens:sites", h);
   }, []);
   const [sel, setSel] = useState<string | null>(null);
   const [addMode, setAddMode] = useState(false);

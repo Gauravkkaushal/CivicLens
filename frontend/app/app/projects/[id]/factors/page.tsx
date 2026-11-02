@@ -100,7 +100,7 @@ export default function Factors() {
 
       <Notice>
         Values come from live sources for this location, your inputs, documented assumptions, or the simulation run. Factors marked <b>No source yet</b> are part of the framework but no data source
-        is connected, so StrataIQ shows them empty instead of making numbers up.
+        is connected, so CivicLens shows them empty instead of making numbers up.
       </Notice>
 
       <Card>

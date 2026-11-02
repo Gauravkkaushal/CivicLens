@@ -82,7 +82,7 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-accent px-4 py-10">
       <div aria-hidden className="lp-grid pointer-events-none absolute inset-0" />
-      <div aria-hidden className="lp-wide pointer-events-none absolute inset-x-0 bottom-0 select-none text-center text-[19vw] leading-[0.78] tracking-[-0.06em] text-white/[0.07]">StrataIQ</div>
+      <div aria-hidden className="lp-wide pointer-events-none absolute inset-x-0 bottom-0 select-none text-center text-[19vw] leading-[0.78] tracking-[-0.06em] text-white/[0.07]">CivicLens</div>
       <div className="rise relative w-full max-w-sm">
         <div className="mb-10 flex justify-center">
           <Logo tone="dark" />

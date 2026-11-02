@@ -1,5 +1,5 @@
 {
-  "name": "strataiq-e2e",
+  "name": "civiclens-e2e",
   "private": true,
   "type": "module",
   "scripts": { "journey": "node journey.mjs" },

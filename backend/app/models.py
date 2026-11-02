@@ -154,7 +154,7 @@ class ActualOutcome(TimestampMixin, Base):
 
 
 class FieldRequest(TimestampMixin, Base):
-    """A request for a StrataIQ field researcher from the project's industry to collect ground data in the catchment."""
+    """A request for a CivicLens field researcher from the project's industry to collect ground data in the catchment."""
     __tablename__ = "field_requests"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
     project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True, nullable=False)

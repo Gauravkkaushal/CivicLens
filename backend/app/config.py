@@ -3,6 +3,12 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from functools import lru_cache
+from pathlib import Path
+from dotenv import load_dotenv
+
+_root = Path(__file__).resolve().parent.parent
+load_dotenv(_root / '.env')
+load_dotenv(_root.parent / '.env')
 
 
 def _bool(v: str | None, default: bool = False) -> bool:
@@ -20,7 +26,7 @@ def _list(v: str | None, default: list[str]) -> list[str]:
 @dataclass(frozen=True)
 class Settings:
     app_env: str = field(default_factory=lambda: os.getenv("APP_ENV", "development"))
-    database_url: str = field(default_factory=lambda: os.getenv("DATABASE_URL", "postgresql+psycopg://strataiq:strataiq@localhost:5432/strataiq"))
+    database_url: str = field(default_factory=lambda: os.getenv("DATABASE_URL", "postgresql+psycopg://civiclens:civiclens@localhost:5432/civiclens"))
     jwt_secret: str = field(default_factory=lambda: os.getenv("JWT_SECRET", "dev-insecure-change-me"))
     jwt_ttl_hours: int = field(default_factory=lambda: int(os.getenv("JWT_TTL_HOURS", "168")))
     cookie_secure: bool = field(default_factory=lambda: _bool(os.getenv("COOKIE_SECURE"), False))
@@ -57,7 +63,7 @@ class Settings:
     @property
     def user_agent(self) -> str:
         contact = f" ({self.contact_email})" if self.contact_email else ""
-        return f"StrataIQ/1.0 market-simulation{contact}"
+        return f"CivicLens/1.0 market-simulation{contact}"
 
     @property
     def sqlalchemy_url(self) -> str:

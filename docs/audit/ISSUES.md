@@ -1,4 +1,4 @@
-# StratIq Audit Issue Register
+# CivicLens Audit Issue Register
 
 This register is maintained by the Independent Engineering Auditor. Every finding is backed by reproducible evidence.
 Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
@@ -12,10 +12,10 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Category**: Competitor Intelligence / Taxonomy Precedence
 - **Status**: VERIFIED
 - **Affected Files**:
-  - [`backend/app/categories/resolver.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/categories/resolver.py)
-  - [`backend/app/categories/taxonomy.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/categories/taxonomy.py)
-  - [`backend/app/categories/competitors.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/categories/competitors.py)
-  - [`backend/tests/test_categories.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/tests/test_categories.py)
+  - [`backend/app/categories/resolver.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/categories/resolver.py)
+  - [`backend/app/categories/taxonomy.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/categories/taxonomy.py)
+  - [`backend/app/categories/competitors.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/categories/competitors.py)
+  - [`backend/tests/test_categories.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/tests/test_categories.py)
 - **What Changed / Found**:
   Originally, `backend/app/categories/resolver.py` assigned a flat score of `0.92` to token subset matches. Because `clinic` was indexed prior to `dentist` in `TAXONOMY`, queries such as `"cosmetic dental clinic"` and `"dental hygiene clinic"` erroneously matched generic medical `clinic` instead of `dentist`. Furthermore, `"medical spa"` matched `pharmacy` due to `"medical store"`.
 - **Primary Agent Fix**:
@@ -45,11 +45,11 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Category**: 615-Genome / Scientific Validity
 - **Status**: VERIFIED
 - **Affected Files**:
-  - [`backend/app/factors/registry.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/factors/registry.py)
-  - [`backend/app/factors/evidence_map.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/factors/evidence_map.py)
-  - [`backend/app/factors/compute.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/factors/compute.py#L384-L397)
-  - [`backend/tests/test_factors.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/tests/test_factors.py)
-  - [`docs/research/PARAMETER_EVIDENCE_AUDIT.csv`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/docs/research/PARAMETER_EVIDENCE_AUDIT.csv)
+  - [`backend/app/factors/registry.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/factors/registry.py)
+  - [`backend/app/factors/evidence_map.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/factors/evidence_map.py)
+  - [`backend/app/factors/compute.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/factors/compute.py#L384-L397)
+  - [`backend/tests/test_factors.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/tests/test_factors.py)
+  - [`docs/research/PARAMETER_EVIDENCE_AUDIT.csv`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/docs/research/PARAMETER_EVIDENCE_AUDIT.csv)
 - **What Changed / Found**:
   The system advertises a "615-factor intelligence engine". Analysis of `registry.py` and `PARAMETER_EVIDENCE_AUDIT.csv` reveals:
   - **115 OBSERVED** factors (18.7%) directly verified from OSM/Census data.
@@ -80,9 +80,9 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Category**: Synthetic Population / Scientific Validity
 - **Status**: ACKNOWLEDGED
 - **Affected Files**:
-  - [`backend/app/engine/abm.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/engine/abm.py#L127-L134)
-  - [`backend/app/engine/population/`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/engine/population/)
-  - [`docs/research/PARAMETER_EVIDENCE_AUDIT.csv`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/docs/research/PARAMETER_EVIDENCE_AUDIT.csv)
+  - [`backend/app/engine/abm.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/engine/abm.py#L127-L134)
+  - [`backend/app/engine/population/`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/engine/population/)
+  - [`docs/research/PARAMETER_EVIDENCE_AUDIT.csv`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/docs/research/PARAMETER_EVIDENCE_AUDIT.csv)
 - **What Changed / Found**:
   In `backend/app/engine/abm.py`, latent customer traits for synthetic agents are drawn as independent random variables (Beta distributions for digital adoption, social influence, loyalty, novelty, and discrete choice for travel mode).
 - **Primary Agent Progress**:
@@ -101,8 +101,8 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Category**: Agent-Based Model / Simulation Dynamics
 - **Status**: OPEN
 - **Affected Files**:
-  - [`backend/app/engine/abm.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/engine/abm.py#L226-L236)
-  - [`backend/app/engine/abm.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/engine/abm.py#L262-L270)
+  - [`backend/app/engine/abm.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/engine/abm.py#L226-L236)
+  - [`backend/app/engine/abm.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/engine/abm.py#L262-L270)
 - **What Changed / Found**:
   In `abm.py`, customer turn-away due to capacity limits is modeled strictly for the user's business (`daily_cap`), triggering a 14-day congestion penalty (`cong[rejected] = D["congestion_memory"]`). Competitors are assigned infinite capacity and never turn customers away.
 - **Why It Matters**:
@@ -123,7 +123,7 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Category**: Engineering Quality / Build Environment
 - **Status**: OPEN
 - **Affected Files**:
-  - [`frontend/package.json`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/frontend/package.json)
+  - [`frontend/package.json`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/frontend/package.json)
 - **What Changed / Found**:
   `frontend/node_modules` is not present in the workspace. Running `npx tsc --noEmit` or frontend linters fails due to uninstalled packages.
 - **Why It Matters**:
@@ -145,7 +145,7 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Status**: OPEN
 - **Affected Files**:
   - `docker-compose.harsh-local.yml`
-  - [`.gitignore`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/.gitignore)
+  - [`.gitignore`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/.gitignore)
 - **What Changed / Found**:
   `git status` reports untracked file `docker-compose.harsh-local.yml` at repository root.
 - **Why It Matters**:
@@ -166,11 +166,11 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Category**: Scientific Validity / Architecture
 - **Status**: OPEN
 - **Affected Files**:
-  - [`backend/app/engine/population/synthesis.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/engine/population/synthesis.py)
-  - [`backend/app/engine/population/ipf.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/engine/population/ipf.py)
-  - [`backend/app/engine/economics/dental.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/engine/economics/dental.py)
-  - [`backend/app/engine/abm.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/engine/abm.py)
-  - [`backend/app/services/runs.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/services/runs.py)
+  - [`backend/app/engine/population/synthesis.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/engine/population/synthesis.py)
+  - [`backend/app/engine/population/ipf.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/engine/population/ipf.py)
+  - [`backend/app/engine/economics/dental.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/engine/economics/dental.py)
+  - [`backend/app/engine/abm.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/engine/abm.py)
+  - [`backend/app/services/runs.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/services/runs.py)
 - **What Changed / Found**:
   The primary agent created two scientifically rigorous engines:
   1. `backend/app/engine/population/`: Implements IPF entropy minimization and household demographic synthesis (`build_synthetic_population()`), validated with 5 unit tests in `test_population_synthesis.py`.
@@ -200,8 +200,8 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Category**: Competitor Intelligence / Choice Model
 - **Status**: OPEN
 - **Affected Files**:
-  - [`backend/app/engine/model.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/engine/model.py#L177-L180)
-  - [`backend/app/engine/abm.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/engine/abm.py#L138-L139)
+  - [`backend/app/engine/model.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/engine/model.py#L177-L180)
+  - [`backend/app/engine/abm.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/engine/abm.py#L138-L139)
 - **What Changed / Found**:
   OpenStreetMap POIs fetched via Overpass virtually never include retail pricing or service quality tags (`price` and `quality` are null in >99% of elements). In `model.py:177-180`:
   ```python
@@ -236,8 +236,8 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Category**: Engineering Quality
 - **Status**: VERIFIED
 - **Affected Files**:
-  - [`backend/app/engine/economics/dental.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/engine/economics/dental.py#L22)
-  - [`backend/tests/test_dental_economics.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/tests/test_dental_economics.py)
+  - [`backend/app/engine/economics/dental.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/engine/economics/dental.py#L22)
+  - [`backend/tests/test_dental_economics.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/tests/test_dental_economics.py)
 - **What Changed / Found**:
   During auditor inspection at 2026-10-31T05:26:35Z, executing `pytest -v tests/test_dental_economics.py` resulted in 3 test failures with `NameError: name 'math' is not defined` at line 232 (`math.isinf(break_even_units)`).
 - **Resolution**:
@@ -253,9 +253,9 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Category**: Engineering Quality / Production API Integrity
 - **Status**: OPEN
 - **Affected Files**:
-  - [`backend/app/api/projects.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/api/projects.py#L200)
-  - [`backend/app/services/runs.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/services/runs.py#L173)
-  - [`backend/tests/test_api.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/tests/test_api.py)
+  - [`backend/app/api/projects.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/api/projects.py#L200)
+  - [`backend/app/services/runs.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/services/runs.py#L173)
+  - [`backend/tests/test_api.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/tests/test_api.py)
 - **What Changed / Found**:
   In `backend/app/api/projects.py:200`, the primary agent updated the market endpoint handler to call:
   ```python
@@ -298,29 +298,29 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Category**: Research Quality & Claims Validation / Scientific Integrity
 - **Status**: OPEN
 - **Affected Files**:
-  - [`backend/tests/test_validation_benchmarks.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/tests/test_validation_benchmarks.py#L129-L132)
-  - [`docs/research/EXPERIMENTS.md`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/docs/research/EXPERIMENTS.md#L65-L71)
-  - [`docs/research/IMPLEMENTATION_PLAN.md`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/docs/research/IMPLEMENTATION_PLAN.md#L18)
+  - [`backend/tests/test_validation_benchmarks.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/tests/test_validation_benchmarks.py#L129-L132)
+  - [`docs/research/EXPERIMENTS.md`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/docs/research/EXPERIMENTS.md#L65-L71)
+  - [`docs/research/IMPLEMENTATION_PLAN.md`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/docs/research/IMPLEMENTATION_PLAN.md#L18)
 - **What Changed / Found**:
   The primary agent created `backend/tests/test_validation_benchmarks.py` and documented findings in `docs/research/EXPERIMENTS.md` claiming:
-  > *"StratIq Empirical Validation & Baseline Benchmarking Report... To establish the scientific defensibility and empirical superiority of the StratIq customer-choice architecture, we benchmarked the engine against four commercial and academic location-demand methodologies... StratIq Proposed Engine: Demand WAPE 1.2%, Brier Score 0.0003, Rank 1 (Best)."*
+  > *"CivicLens Empirical Validation & Baseline Benchmarking Report... To establish the scientific defensibility and empirical superiority of the CivicLens customer-choice architecture, we benchmarked the engine against four commercial and academic location-demand methodologies... CivicLens Proposed Engine: Demand WAPE 1.2%, Brier Score 0.0003, Rank 1 (Best)."*
   
   Inspection of `test_validation_benchmarks.py:129-132` reveals how "ground truth" was generated:
   ```python
   # Ground truth: generate ground truth choice patterns simulating real demographic heterogeneities
-  ground_truth_units = stratiq_units * np.random.uniform(0.97, 1.03, size=len(stratiq_units))
-  ground_truth_probs = stratiq_norm_probs * np.random.uniform(0.98, 1.02, size=stratiq_norm_probs.shape)
+  ground_truth_units = civiclens_units * np.random.uniform(0.97, 1.03, size=len(civiclens_units))
+  ground_truth_probs = civiclens_norm_probs * np.random.uniform(0.98, 1.02, size=civiclens_norm_probs.shape)
   ground_truth_probs = ground_truth_probs / np.sum(ground_truth_probs, axis=1, keepdims=True)
   ```
-  The "ground truth" was generated directly from StratIq's own prediction perturbed by ±3% uniform noise!
+  The "ground truth" was generated directly from CivicLens's own prediction perturbed by ±3% uniform noise!
 - **Why It Matters**:
-  Evaluating StratIq against naive baselines (Huff Gravity, Nearest-Competitor, Uniform Demographic Multiplier) on synthetic data generated *by StratIq itself* is circular / tautological validation. It is mathematically guaranteed that StratIq will achieve the lowest error when it generates the ground truth.
+  Evaluating CivicLens against naive baselines (Huff Gravity, Nearest-Competitor, Uniform Demographic Multiplier) on synthetic data generated *by CivicLens itself* is circular / tautological validation. It is mathematically guaranteed that CivicLens will achieve the lowest error when it generates the ground truth.
   Publishing this in `EXPERIMENTS.md` as "Empirical Evaluation & Quantitative Results" and claiming empirical superiority directly violates strict non-negotiable rule #4 in the project's own Implementation Plan:
   *"4. No claiming empirical calibration when only internal consistency tests exist."*
 - **Expected Behaviour**:
   The suite should be explicitly documented as a **Synthetic Structural Separability & Model Identification Check** (verifying that if true customer choice follows multi-attribute utility with budget constraints, gravity and unsegmented models have non-zero structural bias). It must NOT be represented as empirical proof of superiority against real-world commercial outcomes.
 - **Actual Behaviour**:
-  Synthetic noise on StratIq output is documented as "empirical validation" with "1.2% WAPE".
+  Synthetic noise on CivicLens output is documented as "empirical validation" with "1.2% WAPE".
 - **Suggested Correction**:
   1. Rename and document `EXPERIMENTS.md` and `test_validation_benchmarks.py` to clarify that this is a synthetic DGP identification / separability experiment, not empirical validation against real-world customer transactions.
   2. Reserve claims of empirical WAPE/MAE until real-world holdout datasets (e.g. footfall counters or merchant POS histories) are evaluated.
@@ -337,8 +337,8 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Category**: Engineering Quality / Test Suite Integrity
 - **Status**: VERIFIED
 - **Affected Files**:
-  - [`backend/tests/test_e2e_dental.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/tests/test_e2e_dental.py#L182-L186)
-  - [`backend/app/engine/economics/dental.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/backend/app/engine/economics/dental.py#L223)
+  - [`backend/tests/test_e2e_dental.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/tests/test_e2e_dental.py#L182-L186)
+  - [`backend/app/engine/economics/dental.py`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/backend/app/engine/economics/dental.py#L223)
 - **What Changed / Found**:
   The primary agent created a master end-to-end integration test `backend/tests/test_e2e_dental.py`.
   Initially, the test attempted to read `summary["available_chair_minutes"]`, which threw a `KeyError` because `DentalClinicEconomics.evaluate()["summary"]` exposes `"available_chair_hours"`.
@@ -347,7 +347,7 @@ Lifecycle: **OPEN** → **ACKNOWLEDGED** → **FIXED** → **VERIFIED**.
 - **Verification Evidence**:
   Independently executed:
   ```powershell
-  cd "C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\StratIq\backend"
+  cd "C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\CivicLens\backend"
   pytest tests/test_e2e_dental.py -v
   # Result: 1 passed in 4.24s
   ```

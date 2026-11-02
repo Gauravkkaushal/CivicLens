@@ -2,7 +2,7 @@
 
 /**
  * Quick start for people who don't know the jargon: write the idea in one sentence (English or Hinglish),
- * see the plan StrataIQ understood — with every guessed number labelled — fix anything, and go.
+ * see the plan CivicLens understood — with every guessed number labelled — fix anything, and go.
  */
 import { ArrowRight, Check, Lightbulb, MapPin, Pencil, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";

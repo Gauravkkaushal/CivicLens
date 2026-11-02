@@ -135,7 +135,7 @@ await step("field research", async () => {
   const mob = await ctx.newPage();
   await mob.setViewportSize({ width: 390, height: 844 });
   await mob.goto(`${BASE}/field/${f.request.token}`);
-  await mob.getByText("StrataIQ Field").waitFor({ timeout: 30000 });
+  await mob.getByText("CivicLens Field").waitFor({ timeout: 30000 });
   await mob.waitForTimeout(800);
   await mob.screenshot({ path: `${OUT}/08d-field-app-mobile.png` });
   L("shot 08d-field-app-mobile");

@@ -27,7 +27,7 @@ HDX_PKG = "https://data.humdata.org/api/3/action/package_show?id=relative-wealth
 WORLDPOP_IND = "https://data.worldpop.org/GIS/Population/Global_2000_2020_1km_UNadj/2020/IND/ind_ppp_2020_1km_Aggregated_UNadj.tif"
 GEOBOUNDARIES_ADM1 = "https://www.geoboundaries.org/api/current/gbOpen/IND/ADM1/"
 URBAN_SHARE_2020 = 0.35  # UN World Urbanization Prospects 2018: India 34.9% urban in 2020 (WorldPop reference year)
-UA = {"User-Agent": "StrataIQ-data-pipeline (github.com/HarshDubey23/stratiq)"}
+UA = {"User-Agent": "CivicLens-data-pipeline (github.com/Gauravkkaushal/CivicLens)"}
 
 
 def fetch(url: str) -> bytes:

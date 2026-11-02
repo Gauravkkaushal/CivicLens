@@ -1,4 +1,4 @@
-"""Field research: when open data is missing, a StrataIQ field researcher from the project's own industry goes to the
+"""Field research: when open data is missing, a CivicLens field researcher from the project's own industry goes to the
 street, collects ground data and saves it here. The simulation then runs its agents on that data
 (engine/field.py turns interviews into agent parameters; visited competitors become competitor rows).
 

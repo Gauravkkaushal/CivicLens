@@ -16,7 +16,7 @@ from .engine.model import MODEL_VERSION
 from .providers.http import close_client
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
-log = logging.getLogger("strataiq")
+log = logging.getLogger("civiclens")
 
 
 _migrated = False
@@ -57,7 +57,7 @@ async def lifespan(app: FastAPI):
     await close_client()
 
 
-app = FastAPI(title="StrataIQ API", version="1.0.0", lifespan=lifespan,
+app = FastAPI(title="CivicLens API", version="1.0.0", lifespan=lifespan,
               description="Market simulation and decision-support API. All numeric outputs come from the documented model in docs/MODEL.md.")
 
 app.add_middleware(CORSMiddleware, allow_origins=get_settings().cors_origins, allow_credentials=True,

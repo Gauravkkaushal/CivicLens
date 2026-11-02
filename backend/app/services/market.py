@@ -16,7 +16,7 @@ from ..providers import osm, population, routing
 from ..providers.http import Cache, ProviderError
 from ..providers.registry import provenance
 
-log = logging.getLogger("strataiq.market")
+log = logging.getLogger("civiclens.market")
 
 MAX_RADIUS_KM = 6.0
 

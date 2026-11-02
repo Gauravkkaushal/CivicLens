@@ -70,7 +70,7 @@ export default function Dashboard() {
           <div>
             <p className="label-mono text-white/60">{user?.name && user.name !== "Guest" ? `Namaste, ${user.name.split(" ")[0]}` : "Namaste"}</p>
             <h1 className="lp-wide mt-4 max-w-3xl text-[clamp(2.2rem,4.8vw,4.4rem)] leading-[0.9] tracking-[-0.045em]">What would you open, and where?</h1>
-            <p className="mt-5 max-w-xl text-[15.5px] leading-relaxed text-white/75">Describe any business and pick any street. StrataIQ loads the real market around it and simulates who would come.</p>
+            <p className="mt-5 max-w-xl text-[15.5px] leading-relaxed text-white/75">Describe any business and pick any street. CivicLens loads the real market around it and simulates who would come.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={liveDemo} loading={liveBusy}>
@@ -120,7 +120,7 @@ export default function Dashboard() {
           <EmptyState
             icon={<MapPinned className="h-6 w-6" />}
             title="No simulations yet"
-            body="Describe a business, pick a place, and StrataIQ will load live market evidence and simulate customer choices."
+            body="Describe a business, pick a place, and CivicLens will load live market evidence and simulate customer choices."
             action={<ButtonLink href="/app/projects/new" variant="primary">Build your first market simulation</ButtonLink>}
           />
         )}

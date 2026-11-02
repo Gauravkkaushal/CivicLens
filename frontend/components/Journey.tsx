@@ -88,12 +88,12 @@ export function Journey({ project }: { project: Project }) {
       markVisited(project.id, "sites");
       setVisited(readVisited(project.id));
     };
-    window.addEventListener("strataiq:sites", h);
+    window.addEventListener("civiclens:sites", h);
     const open = () => setTour(true);
-    window.addEventListener("strataiq:tour", open);
+    window.addEventListener("civiclens:tour", open);
     return () => {
-      window.removeEventListener("strataiq:sites", h);
-      window.removeEventListener("strataiq:tour", open);
+      window.removeEventListener("civiclens:sites", h);
+      window.removeEventListener("civiclens:tour", open);
     };
   }, [project.id]);
   useEffect(() => {
@@ -186,14 +186,14 @@ const SLIDES = [
   { icon: Footprints, t: "2 · Check the street", d: "Maps miss informal shops and real prices. Request a field researcher from your industry: they open a link on their phone, interview people, visit every rival and count footfall. The agents switch to that ground data." },
   { icon: Users, t: "3 · 10,000 simulated people decide", d: "Each simulated person has a budget, a way to travel, free hours and tastes. Every day, those who need what you sell pick you, a rival or nothing. That gives your orders, profit and risk." },
   { icon: Crosshair, t: "4 · Try other plans", d: "In the Simulation lab change price, rent, marketing or the site and run again. \"Best sites\" on the map tests your plan at every spot nearby." },
-  { icon: Mic, t: "5 · Just ask", d: "Press V and talk, in English or Hinglish: \"how can I grow?\", \"best location kahan hai?\", \"what is break-even?\". Strata answers from the simulation." },
+  { icon: Mic, t: "5 · Just ask", d: "Press V and talk, in English or Hinglish: \"how can I grow?\", \"best location kahan hai?\", \"what is break-even?\". CivicLens answers from the simulation." },
 ]
 
 function Tour({ onClose, base }: { onClose: () => void; base: string }) {
   const [i, setI] = useState(0);
   const s = SLIDES[i];
   return (
-    <div className="fixed inset-0 z-[95] flex items-center justify-center bg-ink-100/25 p-4 backdrop-blur-sm" role="dialog" aria-label="How StrataIQ works">
+    <div className="fixed inset-0 z-[95] flex items-center justify-center bg-ink-100/25 p-4 backdrop-blur-sm" role="dialog" aria-label="How CivicLens works">
       <div className="panel rise w-full max-w-lg rounded-xl p-6">
         <div className="flex items-start justify-between">
           <s.icon className="h-7 w-7 text-accent" />
@@ -236,7 +236,7 @@ function Glossary({ onClose }: { onClose: () => void }) {
             </div>
           ))}
         </dl>
-        <p className="mt-6 text-xs text-ink-500">Tip: you can also ask Strata — press V and say &quot;what is break-even?&quot;</p>
+        <p className="mt-6 text-xs text-ink-500">Tip: you can also ask CivicLens — press V and say &quot;what is break-even?&quot;</p>
       </div>
     </div>
   );

@@ -16,5 +16,5 @@ jobs:
     steps:
       - name: Ping API health
         run: |
-          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 180 "https://strataiq-api-c2dc.onrender.com/api/health" || true)
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 180 "https://civiclens-api-c2dc.onrender.com/api/health" || true)
           echo "api health -> $code"

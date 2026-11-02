@@ -12,7 +12,7 @@ import httpx
 
 from ..config import get_settings
 
-log = logging.getLogger("strataiq.providers")
+log = logging.getLogger("civiclens.providers")
 
 _client: httpx.AsyncClient | None = None
 _client_loop: asyncio.AbstractEventLoop | None = None
@@ -78,26 +78,39 @@ def cache_key(provider: str, payload: dict) -> str:
     return hashlib.sha256(raw.encode()).hexdigest()
 
 
+_MEM_CACHE: dict[str, tuple[dict, datetime, datetime]] = {}
+
 class Cache:
-    """Thin cache over the provider_cache table. Works without a DB session (no-op)."""
+    """Fast in-memory + database cache over the provider_cache table."""
 
     def __init__(self, session_factory=None):
         self.session_factory = session_factory
 
     def get(self, key: str) -> tuple[dict, datetime] | None:
+        now = datetime.now(timezone.utc)
+        if key in _MEM_CACHE:
+            payload, fetched_at, expires_at = _MEM_CACHE[key]
+            if expires_at > now:
+                return payload, fetched_at
+            _MEM_CACHE.pop(key, None)
+
         if not self.session_factory:
             return None
         from ..models import ProviderCache
         try:
             with self.session_factory() as db:
                 row = db.get(ProviderCache, key)
-                if row and row.expires_at > datetime.now(timezone.utc):
+                if row and row.expires_at > now:
+                    _MEM_CACHE[key] = (row.payload, row.fetched_at, row.expires_at)
                     return row.payload, row.fetched_at
-        except Exception as e:  # cache must never break a request
+        except Exception as e:
             log.warning("cache read failed: %s", e)
         return None
 
     def put(self, key: str, provider: str, payload: dict, ttl: timedelta) -> None:
+        now = datetime.now(timezone.utc)
+        _MEM_CACHE[key] = (payload, now, now + ttl)
+
         if not self.session_factory:
             return
         from ..models import ProviderCache

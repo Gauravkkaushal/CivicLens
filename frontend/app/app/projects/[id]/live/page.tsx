@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Area, CartesianGrid, ComposedChart, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import AgentXray from "@/components/AgentXray";
 import { DataLineage, IncomeMix } from "@/components/RealData";
-import { CompareCard, HowAgentsDecide, runStrategy, StrataRead, StrategyLab, type Changes, type StrategyOut } from "@/components/StrategyLab";
+import { CompareCard, HowAgentsDecide, runStrategy, CivicLensRead, StrategyLab, type Changes, type StrategyOut } from "@/components/StrategyLab";
 import { publishScreen, takePendingStrategy } from "@/lib/screen";
 import { BestStrategy } from "@/components/BestStrategy";
 import { useProject } from "@/components/ProjectContext";
@@ -44,8 +44,8 @@ export default function LiveMarket() {
   const [optKey, setOptKey] = useState(0);
   useEffect(() => {
     const h = () => setOptKey(Date.now());
-    window.addEventListener("strataiq:optimize", h);
-    return () => window.removeEventListener("strataiq:optimize", h);
+    window.addEventListener("civiclens:optimize", h);
+    return () => window.removeEventListener("civiclens:optimize", h);
   }, []);
 
   const load = useCallback(async () => {
@@ -132,8 +132,8 @@ export default function LiveMarket() {
       })();
     };
     h(); // a strategy may have been run (by voice) before this page mounted
-    window.addEventListener("strataiq:strategy", h);
-    return () => window.removeEventListener("strataiq:strategy", h);
+    window.addEventListener("civiclens:strategy", h);
+    return () => window.removeEventListener("civiclens:strategy", h);
   }, [reload]);
 
   const abm = res?.abm;
@@ -316,7 +316,7 @@ export default function LiveMarket() {
           <StrategyLab projectId={p.id} scenario={sc} arch={p.archetype} unit={unit} busy={testing} onRun={testStrategy} />
         )}
         {cmp && <CompareCard out={cmp} unit={unit} />}
-        {abm && res && <StrataRead projectId={p.id} scenarioId={sc.id} runId={runId} busy={testing} onTest={testStrategy} />}
+        {abm && res && <CivicLensRead projectId={p.id} scenarioId={sc.id} runId={runId} busy={testing} onTest={testStrategy} />}
         {abm && res && (
           <>
             {(() => {

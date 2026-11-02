@@ -1,6 +1,6 @@
 """Master End-to-End Scientific Integration Test: Dental Clinic in Indiranagar, Bengaluru.
 
-Validates the complete integrated StratIq pipeline end-to-end:
+Validates the complete integrated CivicLens pipeline end-to-end:
 1. Phase 1: Category Resolution ("dental clinic" -> "dentist") & 6-Tier Competitor Filtering.
 2. Phase 2: Factor Registry parameter bindings and evidence classifications.
 3. Phase 3: Spatial Synthetic Population Generation with IPF demographic marginal convergence (<2% error).

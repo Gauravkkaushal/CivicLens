@@ -364,7 +364,7 @@ export function Wizard() {
           <div className="space-y-5">
             <h2 className="text-base font-semibold">Finances</h2>
             <Notice>
-              <b>Startup cash</b> is what you spend before opening (fit-out, equipment, deposit). <b>Operating profit</b> is monthly revenue minus monthly running costs. StrataIQ keeps them separate
+              <b>Startup cash</b> is what you spend before opening (fit-out, equipment, deposit). <b>Operating profit</b> is monthly revenue minus monthly running costs. CivicLens keeps them separate
               and uses startup cash only for the payback period.
             </Notice>
             <div className="grid gap-4 sm:grid-cols-2">

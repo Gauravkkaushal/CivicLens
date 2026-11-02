@@ -10,7 +10,7 @@
 
 ## 1. Mathematical Formulation
 
-The synthesis engine re-engineers StratIq's population pipeline from arbitrary univariate sampling into a constrained entropy-minimization microsimulation.
+The synthesis engine re-engineers CivicLens's population pipeline from arbitrary univariate sampling into a constrained entropy-minimization microsimulation.
 
 ### Optimization Problem:
 Let $N$ be the number of synthesized consumer profiles, each initially endowed with baseline weights $w_i^{(0)} > 0$. The objective is to compute calibrated weights $w_i \ge 0$ satisfying $K$ marginal population constraints while minimizing information divergence (Kullback-Leibler distance):

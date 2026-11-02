@@ -173,7 +173,7 @@ function Intro({ onDone }: { onDone: () => void }) {
       {[12, 30, 48, 66, 84].map((x, i) => <span key={`v${x}`} className="lp-rule-v" style={{ left: `${x}%`, animationDelay: `${120 + i * 90}ms` }} />)}
       <div className="absolute inset-x-6 bottom-8 md:inset-x-10 md:bottom-10">
         <div className="overflow-hidden">
-          <div className="lp-wide lp-intro-word text-[clamp(3.6rem,15vw,15rem)] leading-[0.82]">StrataIQ</div>
+          <div className="lp-wide lp-intro-word text-[clamp(3.6rem,15vw,15rem)] leading-[0.82]">CivicLens</div>
         </div>
         <div className="mt-5 flex items-center gap-6">
           <div className="h-px flex-1 bg-white/25"><div className="h-px bg-white" style={{ width: `${n}%` }} /></div>
@@ -197,14 +197,14 @@ function Rise({ text, go, delay = 0 }: { text: string; go: boolean; delay?: numb
 
 function Wordmark() {
   return (
-    <Link href="/" aria-label="StrataIQ home" className="flex items-center gap-2.5 text-white">
+    <Link href="/" aria-label="CivicLens home" className="flex items-center gap-2.5 text-white">
       <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden>
         <path d="M4 20.5 16 26l12-5.5" stroke="currentColor" strokeOpacity=".45" strokeWidth="1.6" strokeLinecap="round" />
         <path d="M4 15.5 16 21l12-5.5" stroke="currentColor" strokeOpacity=".7" strokeWidth="1.6" strokeLinecap="round" />
         <path d="M4 10.5 16 16l12-5.5L16 5 4 10.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
         <circle cx="16" cy="10.6" r="2.2" fill="currentColor" />
       </svg>
-      <span className="lp-wide text-[17px] tracking-[-0.02em]">StrataIQ</span>
+      <span className="lp-wide text-[17px] tracking-[-0.02em]">CivicLens</span>
     </Link>
   );
 }
@@ -451,7 +451,7 @@ export default function Landing() {
               <h2 className="lp-wide text-[clamp(2.6rem,6vw,6rem)] leading-[0.88] tracking-[-0.045em]">Don&apos;t click. Just talk.</h2>
               <Wave />
               <p className="mt-8 max-w-md text-[18px] leading-[1.6] text-white/70">
-                Strata runs the whole app by voice — starts your project, loads the market, changes your rent, finds the best spot, sends a field researcher and builds the report. In proper Hinglish, with numbers only from the simulation.
+                CivicLens runs the whole app by voice — starts your project, loads the market, changes your rent, finds the best spot, sends a field researcher and builds the report. In proper Hinglish, with numbers only from the simulation.
               </p>
               <p className="mt-6 text-[15px] text-white/55">Press <kbd className="rounded-[4px] border border-white/30 px-1.5 text-[12px] text-white">V</kbd> anywhere to start.</p>
             </div>
@@ -505,7 +505,7 @@ export default function Landing() {
               <Link href="/sign-in" className="hover:text-white">Sign in</Link>
             </div>
           </div>
-          <div aria-hidden className="lp-wide mt-14 select-none text-[19.5vw] leading-[0.8] tracking-[-0.06em] xl:text-[270px]">StrataIQ</div>
+          <div aria-hidden className="lp-wide mt-14 select-none text-[19.5vw] leading-[0.8] tracking-[-0.06em] xl:text-[270px]">CivicLens</div>
         </footer>
       </main>
     </div>
@@ -625,7 +625,7 @@ function PhoneMock() {
       <div className="phone-float relative rounded-[42px] bg-black p-2.5 shadow-[0_50px_100px_-30px_rgba(0,0,40,.6)]">
         <div className="rounded-[34px] bg-white p-5 text-black">
           <div className="flex items-center justify-between text-[11.5px] text-black/50">
-            <span className="font-semibold text-black">StrataIQ Field</span>
+            <span className="font-semibold text-black">CivicLens Field</span>
             <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#2F49FF]" /> Collecting</span>
           </div>
           <div className="lp-wide mt-4 text-[19px] leading-tight tracking-[-0.03em]">Gym, Sector 18</div>

@@ -33,7 +33,7 @@ export async function api<T>(path: string, init: RequestInit & { json?: unknown 
       cache: "no-store",
     });
   } catch {
-    throw new ApiError(0, "Cannot reach the StrataIQ server. Check your connection.");
+    throw new ApiError(0, "Cannot reach the CivicLens server. Check your connection.");
   }
   if (res.status === 204) return undefined as T;
   let body: unknown = null;

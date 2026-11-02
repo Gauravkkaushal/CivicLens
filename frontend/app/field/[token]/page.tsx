@@ -62,7 +62,7 @@ export default function FieldApp() {
       <header className="sticky top-0 z-20 border-b border-black/[0.06] bg-ink-950/90 px-5 pb-3 pt-4 backdrop-blur-xl">
         <div className="flex items-center gap-2.5">
           <LogoMark size={22} />
-          <span className="text-[13px] font-medium">StrataIQ Field</span>
+          <span className="text-[13px] font-medium">CivicLens Field</span>
           <span className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-field/40 bg-field/10 px-2 py-0.5 text-[11px] text-field">
             <span className="h-1.5 w-1.5 rounded-full bg-field" /> {b.request.status === "submitted" ? "Submitted" : "Collecting"}
           </span>
@@ -133,7 +133,7 @@ export default function FieldApp() {
               <Send className="h-4 w-4" /> I&apos;m done — send to analyst
             </button>
           )}
-          <p className="mt-4 text-center text-[11px] leading-relaxed text-ink-500">This link only adds data to one StrataIQ project. Do not record personal details of the people you interview.</p>
+          <p className="mt-4 text-center text-[11px] leading-relaxed text-ink-500">This link only adds data to one CivicLens project. Do not record personal details of the people you interview.</p>
         </div>
       </main>
     </div>

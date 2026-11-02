@@ -27,7 +27,7 @@ async function proxy(req: NextRequest, ctx: { params: Promise<{ path: string[] }
   try {
     upstream = await fetch(target, init);
   } catch {
-    return Response.json({ detail: "The StrataIQ API is waking up or unreachable. Try again in a few seconds." }, { status: 503 });
+    return Response.json({ detail: "The CivicLens API is waking up or unreachable. Try again in a few seconds." }, { status: 503 });
   }
   const out = new Headers();
   upstream.headers.forEach((v, k) => {

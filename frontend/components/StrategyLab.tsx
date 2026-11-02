@@ -2,7 +2,7 @@
 
 /**
  * Strategy lab for the live market: change a lever, the same 10,000 agents re-decide, the map replays,
- * and the result is compared with the run you started from. Also: Strata's read of the run (insights with a
+ * and the result is compared with the run you started from. Also: CivicLens's read of the run (insights with a
  * one-click test) and a plain-language "how an agent decides" card filled with this run's numbers.
  */
 import { ArrowDownRight, ArrowUpRight, Brain, ChevronDown, FlaskConical, Lightbulb, Minus, Sparkles } from "lucide-react";
@@ -185,7 +185,7 @@ export function CompareCard({ out, unit }: { out: StrategyOut; unit: string }) {
   );
 }
 
-export function StrataRead({ projectId, scenarioId, runId, busy, onTest }: { projectId: string; scenarioId: string; runId: string | null; busy: boolean; onTest: (c: Changes) => void }) {
+export function CivicLensRead({ projectId, scenarioId, runId, busy, onTest }: { projectId: string; scenarioId: string; runId: string | null; busy: boolean; onTest: (c: Changes) => void }) {
   const [items, setItems] = useState<Insight[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   useEffect(() => {
@@ -203,7 +203,7 @@ export function StrataRead({ projectId, scenarioId, runId, busy, onTest }: { pro
   if (!runId) return null;
   return (
     <div className="rounded-xl border border-black/[0.07] bg-black/[0.025] p-3 text-xs">
-      <div className="mb-2 flex items-center gap-2"><Lightbulb className="h-3.5 w-3.5 text-warn" /><span className="font-medium text-ink-100">Strata&apos;s read of this run</span></div>
+      <div className="mb-2 flex items-center gap-2"><Lightbulb className="h-3.5 w-3.5 text-warn" /><span className="font-medium text-ink-100">CivicLens&apos;s read of this run</span></div>
       {err && <p className="text-ink-400">{err}</p>}
       {!items && !err && <p className="text-ink-500">Reading the simulation…</p>}
       <div className="space-y-2.5">

@@ -55,7 +55,7 @@ export default function MonitorPage() {
   return (
     <main className="mx-auto w-full max-w-6xl space-y-5 p-4 md:p-6">
       <Notice>
-        Record what actually happens once you open. StrataIQ compares it with the baseline forecast so you can see which assumptions were off. {m?.note}
+        Record what actually happens once you open. CivicLens compares it with the baseline forecast so you can see which assumptions were off. {m?.note}
       </Notice>
       {error && <ErrorState message={error} />}
       <div className="grid gap-5 lg:grid-cols-[1fr_340px]">

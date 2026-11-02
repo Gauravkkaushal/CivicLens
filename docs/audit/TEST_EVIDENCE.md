@@ -1,4 +1,4 @@
-# StratIq Audit Test Evidence
+# CivicLens Audit Test Evidence
 
 This document records exact test invocations, environments, and raw execution evidence collected by the Independent Engineering Auditor.
 Rule: **Never invent test results. Every claim must have executed proof.**
@@ -12,12 +12,12 @@ Rule: **Never invent test results. Every claim must have executed proof.**
 - **Python**: 3.13.12 (win32)
 - **Pytest**: 9.1.1, pluggy 1.6.0
 - **Pytest Plugins**: anyio-4.10.0, langsmith-0.11.0, asyncio-1.4.0
-- **Root Directory**: `C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\StratIq\backend`
+- **Root Directory**: `C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\CivicLens\backend`
 - **Git Commit Baseline**: `0883fb4` (`Docs: agent-based live market and factor engine`)
 
 ### Execution Command
 ```bash
-cd "C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\StratIq\backend"
+cd "C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\CivicLens\backend"
 pytest -v
 ```
 
@@ -25,7 +25,7 @@ pytest -v
 ```
 ============================= test session starts =============================
 platform win32 -- Python 3.13.12, pytest-9.1.1, pluggy-1.6.0
-rootdir: C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\StratIq\backend
+rootdir: C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\CivicLens\backend
 configfile: pytest.ini
 testpaths: tests
 plugins: anyio-4.10.0, langsmith-0.11.0, asyncio-1.4.0
@@ -50,12 +50,12 @@ tests\test_market.py .........                                           [100%]
 - **Python**: 3.13.12 (win32)
 - **Pytest**: 9.1.1, pluggy 1.6.0
 - **Pytest Plugins**: anyio-4.10.0, langsmith-0.11.0, asyncio-1.4.0
-- **Root Directory**: `C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\StratIq\backend`
+- **Root Directory**: `C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\CivicLens\backend`
 - **Git Baseline**: `0883fb4` + Working Tree Mutations (Resolver, Competitors, Population Synthesis, Dental Economics)
 
 ### Execution Command 1: Full Test Suite
 ```bash
-cd "C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\StratIq\backend"
+cd "C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\CivicLens\backend"
 pytest -v
 ```
 
@@ -63,7 +63,7 @@ pytest -v
 ```
 ============================= test session starts =============================
 platform win32 -- Python 3.13.12, pytest-9.1.1, pluggy-1.6.0
-rootdir: C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\StratIq\backend
+rootdir: C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\CivicLens\backend
 configfile: pytest.ini
 testpaths: tests
 plugins: anyio-4.10.0, langsmith-0.11.0, asyncio-1.4.0
@@ -103,7 +103,7 @@ tests\test_population_synthesis.py .....                                 [100%]
 ### Verification 1: Resolved Category Collision (SIQ-ISSUE-001 Verification)
 - **Command**:
   ```bash
-  python -c "import sys; sys.path.insert(0, r'C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\StratIq\backend'); from app.categories.resolver import resolve_offline; print('cosmetic dental clinic ->', resolve_offline('cosmetic dental clinic').key); print('medical spa ->', resolve_offline('medical spa').key)"
+  python -c "import sys; sys.path.insert(0, r'C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\CivicLens\backend'); from app.categories.resolver import resolve_offline; print('cosmetic dental clinic ->', resolve_offline('cosmetic dental clinic').key); print('medical spa ->', resolve_offline('medical spa').key)"
   ```
 - **Terminal Output**:
   ```
@@ -116,7 +116,7 @@ tests\test_population_synthesis.py .....                                 [100%]
 - **Command**:
   ```bash
   python -c "import csv; from collections import Counter;
-  with open(r'C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\StratIq\docs\research\PARAMETER_EVIDENCE_AUDIT.csv', encoding='utf-8') as f:
+  with open(r'C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\CivicLens\docs\research\PARAMETER_EVIDENCE_AUDIT.csv', encoding='utf-8') as f:
       rows = list(csv.DictReader(f))
   print('Total parameters:', len(rows))
   print('Status counts:', dict(Counter(r['Evidence status'] for r in rows)))
@@ -152,13 +152,13 @@ tests\test_population_synthesis.py .....                                 [100%]
 ### Full Pytest Suite Execution
 - **Command**:
   ```powershell
-  Set-Location "C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\StratIq\backend"; pytest -v
+  Set-Location "C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\CivicLens\backend"; pytest -v
   ```
 - **Raw Terminal Output**:
   ```
   ============================= test session starts =============================
   platform win32 -- Python 3.13.12, pytest-9.1.1, pluggy-1.6.0
-  rootdir: C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\StratIq\backend
+  rootdir: C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\CivicLens\backend
   configfile: pytest.ini
   testpaths: tests
   plugins: anyio-4.10.0, langsmith-0.11.0, asyncio-1.4.0
@@ -226,18 +226,18 @@ tests\test_population_synthesis.py .....                                 [100%]
 - **File**: `backend/tests/test_validation_benchmarks.py` (lines 129–133)
   ```python
   # Ground truth: generate ground truth choice patterns simulating real demographic heterogeneities
-  ground_truth_units = stratiq_units * np.random.uniform(0.97, 1.03, size=len(stratiq_units))
-  ground_truth_probs = stratiq_norm_probs * np.random.uniform(0.98, 1.02, size=stratiq_norm_probs.shape)
+  ground_truth_units = civiclens_units * np.random.uniform(0.97, 1.03, size=len(civiclens_units))
+  ground_truth_probs = civiclens_norm_probs * np.random.uniform(0.98, 1.02, size=civiclens_norm_probs.shape)
   ground_truth_probs = ground_truth_probs / np.sum(ground_truth_probs, axis=1, keepdims=True)
   ```
 - **Published Claims in `docs/research/EXPERIMENTS.md`** (lines 65–71):
   ```markdown
   | Model Architecture | Demand WAPE (%) | Mean Absolute Error (Units/Mo) | Multi-Class Brier Score | Rank |
   |---|---|---|---|---|
-  | **StratIq Proposed Engine** | **1.2%** | **18.4** | **0.0003** | **1 (Best)** |
+  | **CivicLens Proposed Engine** | **1.2%** | **18.4** | **0.0003** | **1 (Best)** |
   | Unsegmented Conditional Logit | 24.8% | 382.1 | 0.0412 | 2 |
   | Huff Gravity Model (lambda=1.5) | 42.6% | 655.3 | 0.0984 | 3 |
   | Radius Demographic Multiplier | 58.1% | 894.2 | 0.1420 | 4 |
   | Nearest-Competitor Voronoi | 67.4% | 1,037.0 | 0.4851 | 5 |
   ```
-- **Auditor Finding**: Verified circular validation. StratIq achieves a 1.2% WAPE strictly because "ground truth" was generated directly from its own model prediction multiplied by `uniform(0.97, 1.03)`. Representing this as empirical proof of superiority against real-world retail outcomes is methodologically invalid.
+- **Auditor Finding**: Verified circular validation. CivicLens achieves a 1.2% WAPE strictly because "ground truth" was generated directly from its own model prediction multiplied by `uniform(0.97, 1.03)`. Representing this as empirical proof of superiority against real-world retail outcomes is methodologically invalid.

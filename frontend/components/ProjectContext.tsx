@@ -39,8 +39,8 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   // the voice analyst runs real what-if simulations; refresh when it does
   useEffect(() => {
     const h = () => void reload();
-    window.addEventListener("strataiq:refresh", h);
-    return () => window.removeEventListener("strataiq:refresh", h);
+    window.addEventListener("civiclens:refresh", h);
+    return () => window.removeEventListener("civiclens:refresh", h);
   }, [reload]);
 
   return (

@@ -143,7 +143,7 @@ export default function SimulationLab() {
       return [r.scenario.name, m.price, m.units_sold, m.revenue, m.operating_cost, m.operating_profit, m.profit_p10, m.profit_p50, m.profit_p90, m.prob_loss, m.break_even_units, m.utilization, m.payback_months];
     });
     const csv = [head, ...rows].map((r) => r.map((x) => (x === null || x === undefined ? "" : `"${String(x).replace(/"/g, '""')}"`)).join(",")).join("\n");
-    const blob = new Blob([`# StrataIQ model estimates (${res?.model_version || ""}). Not a guarantee.\n${csv}`], { type: "text/csv" });
+    const blob = new Blob([`# CivicLens model estimates (${res?.model_version || ""}). Not a guarantee.\n${csv}`], { type: "text/csv" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `${p.name.replace(/[^a-z0-9]+/gi, "-")}-scenarios.csv`;

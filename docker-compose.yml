@@ -6,13 +6,13 @@ services:
   db:
     image: postgis/postgis:16-3.4
     environment:
-      POSTGRES_USER: strataiq
-      POSTGRES_PASSWORD: strataiq
-      POSTGRES_DB: strataiq
+      POSTGRES_USER: civiclens
+      POSTGRES_PASSWORD: civiclens
+      POSTGRES_DB: civiclens
     ports: ["5432:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U strataiq"]
+      test: ["CMD-SHELL", "pg_isready -U civiclens"]
       interval: 5s
       retries: 20
 
@@ -22,7 +22,7 @@ services:
       - path: .env
         required: false
     environment:
-      DATABASE_URL: postgresql://strataiq:strataiq@db:5432/strataiq
+      DATABASE_URL: postgresql://civiclens:civiclens@db:5432/civiclens
       JWT_SECRET: ${JWT_SECRET:-dev-insecure-change-me}
       CORS_ORIGINS: http://localhost:3000
     ports: ["8000:8000"]

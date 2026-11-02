@@ -1,4 +1,4 @@
-# StratIq Primary Agent Activity & Observation Log
+# CivicLens Primary Agent Activity & Observation Log
 
 This document tracks observable actions taken by the primary implementation agent, baseline repository checkpoints, and independent auditor verification records.
 
@@ -42,7 +42,7 @@ This document tracks observable actions taken by the primary implementation agen
 - **Timestamp**: 2026-10-31T05:04:00Z
 - **Observed Mutation**:
   - New untracked directory detected: `docs/research/`
-  - New file generated: [`docs/research/PARAMETER_EVIDENCE_AUDIT.csv`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/StratIq/docs/research/PARAMETER_EVIDENCE_AUDIT.csv) (168,019 bytes, 616 lines).
+  - New file generated: [`docs/research/PARAMETER_EVIDENCE_AUDIT.csv`](file:///C:/Users/Lenovo/OneDrive/Desktop/INNOTECH/CivicLens/docs/research/PARAMETER_EVIDENCE_AUDIT.csv) (168,019 bytes, 616 lines).
 - **Inspection & Analysis**:
   - The primary agent has conducted a comprehensive parameter-by-parameter audit across all 615 genome factors.
   - Primary agent independently categorized factors into `OBSERVED`, `DERIVED`, `ASSUMED`, and `UNSUPPORTED`.
@@ -90,5 +90,5 @@ This document tracks observable actions taken by the primary implementation agen
   - Travel time matrix precomputation and fallback validated with unit tests.
 - **Auditor Discoveries & Defect Logs**:
   1. **Production Runtime API Crash ([SIQ-ISSUE-010])**: Primary agent called `competitors_for(db, p, loc, radius, direct_only=False)` in `api/projects.py:200`, but omitted `direct_only` from `services/runs.py:173`. Crashes `GET /projects/{id}/market` with unhandled `TypeError`.
-  2. **Circular Benchmark Validation Fallacy ([SIQ-ISSUE-011])**: In `test_validation_benchmarks.py:129-132`, "ground truth" was generated directly from StratIq's own output plus ±3% uniform noise. In `docs/research/EXPERIMENTS.md`, this is claimed as "Empirical Evaluation" with a "1.2% WAPE" demonstrating superiority over Huff gravity. Flagged for reclassification as a synthetic structural separability check.
+  2. **Circular Benchmark Validation Fallacy ([SIQ-ISSUE-011])**: In `test_validation_benchmarks.py:129-132`, "ground truth" was generated directly from CivicLens's own output plus ±3% uniform noise. In `docs/research/EXPERIMENTS.md`, this is claimed as "Empirical Evaluation" with a "1.2% WAPE" demonstrating superiority over Huff gravity. Flagged for reclassification as a synthetic structural separability check.
   3. **Runtime Disconnection ([SIQ-ISSUE-007])**: Confirmed that `ConditionalLogitEstimator`, `build_synthetic_population()`, and `DentalClinicEconomics` remain disconnected from `services/runs.py` and `simulate.py`.

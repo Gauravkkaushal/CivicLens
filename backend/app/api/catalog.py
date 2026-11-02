@@ -94,8 +94,13 @@ PREVIEW_SPOTS = {
 PREVIEW_CATS = {"gym", "cafe", "pizza", "restaurant", "pharmacy", "salon", "bakery_cafe", "grocery", "clothing"}
 
 
+_PREVIEW_CACHE: dict[str, dict] = {}
+
 @router.get("/market/preview")
 async def preview(spot: str = Query(default="cp-delhi"), category: str = Query(default="cafe"), radius_m: int = Query(default=1600, ge=300, le=3000)):
+    ckey = f"{spot}:{category}:{radius_m}"
+    if ckey in _PREVIEW_CACHE:
+        return _PREVIEW_CACHE[ckey]
     if spot not in PREVIEW_SPOTS or category not in PREVIEW_CATS:
         raise HTTPException(404, "Unknown preview")
     sp = PREVIEW_SPOTS[spot]
@@ -107,11 +112,13 @@ async def preview(spot: str = Query(default="cp-delhi"), category: str = Query(d
                                                  timeout_s=30, terms=[entry.label.split("/")[0].strip(), *entry.synonyms[:2]])
     except ProviderError as e:
         raise HTTPException(502, f"OpenStreetMap is busy right now ({e.message[:100]})") from e
-    return {"spot": {**sp, "key": spot}, "category": {"key": entry.key, "label": entry.label}, "radius_m": radius_m,
+    out = {"spot": {**sp, "key": spot}, "category": {"key": entry.key, "label": entry.label}, "radius_m": radius_m,
             "competitors": [{"name": p["name"] or "Unnamed", "lat": p["lat"], "lng": p["lng"], "ref": p["ref"]} for p in pois],
             "source": {"name": " + ".join([prov.get("name") or ""] + [a["name"] for a in prov.get("also") or []]),
                        "retrieved_at": prov.get("retrieved_at"), "detail": prov.get("detail"), "from_cache": prov.get("from_cache"),
                        "attribution": " · ".join([prov.get("attribution") or ""] + [a["attribution"] for a in prov.get("also") or []])}}
+    _PREVIEW_CACHE[ckey] = out
+    return out
 
 
 @router.get("/market/sources-check")

@@ -12,7 +12,7 @@ All sources are described once in `backend/app/providers/registry.py`; the UI re
 | User input | prices, costs, competitors, actual outcomes | — | owned by the user | labelled user-entered, never “verified” |
 | Anthropic API | optional category mapping and explanation text | optional (`ANTHROPIC_API_KEY`) | — | never produces numbers |
 
-**Timestamps.** Each provenance record stores `retrieved_at` (when StrataIQ fetched it) and `source_updated_at` (OSM database
+**Timestamps.** Each provenance record stores `retrieved_at` (when CivicLens fetched it) and `source_updated_at` (OSM database
 timestamp / record edit time / WorldPop reference year). The UI always shows both.
 
 **Failures.** If a provider fails, the snapshot is saved with status `partial`/`failed` and an `errors` list; nothing is

@@ -1,5 +1,5 @@
 /**
- * Offline command router for Strata (used when the realtime ElevenLabs agent is not connected).
+ * Offline command router for CivicLens (used when the realtime ElevenLabs agent is not connected).
  * It understands Hinglish / English commands, runs the SAME client tools the realtime agent uses and speaks the
  * result in Hinglish. Every number in a reply comes from a tool result (simulation, live data, the page itself).
  * Returns null when it doesn't recognise the request, so the caller can fall back to the backend fact router.

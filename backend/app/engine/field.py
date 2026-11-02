@@ -1,6 +1,6 @@
 """Ground-truth field research -> model evidence.
 
-A StrataIQ field researcher (matched to the project's industry) visits the catchment and records:
+A CivicLens field researcher (matched to the project's industry) visits the catchment and records:
 
 * ``interview``  — street-intercept interviews: does the person use this category, how often, the most they would pay,
   how far they travel for it;

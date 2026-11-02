@@ -24,5 +24,5 @@ project so its snapshot is cached. Keep the labelled offline demo (`Open labelle
    make this result wrong?*, next actions.
 8. **Science (30 s)** — /methodology: logit with outside option, affordability, Monte Carlo; validation status is honest.
 
-Closing line: *StrataIQ does not claim to know every customer or every business. It makes assumptions visible, quantifies
+Closing line: *CivicLens does not claim to know every customer or every business. It makes assumptions visible, quantifies
 uncertainty, and tells you what to verify before you invest.*

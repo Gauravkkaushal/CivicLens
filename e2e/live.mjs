@@ -2,7 +2,7 @@
 import { chromium } from "playwright";
 import fs from "node:fs";
 
-const BASE = process.env.BASE_URL || "https://strataiq-vbuo.onrender.com";
+const BASE = process.env.BASE_URL || "https://civiclens-vbuo.onrender.com";
 const OUT = "out-live";
 fs.mkdirSync(OUT, { recursive: true });
 const log = [];
@@ -127,7 +127,7 @@ await step("decisions", async () => {
 
 await step("voice analyst (grounded answers)", async () => {
   for (const q of ["kitne competitors hain?", "what is my profit", "what is the break even", "try price 300", "how do agents decide whom to choose?", "what insights do you see on this map?", "double the marketing", "where should I open?", "find the best strategy", "P10 ka matlab kya hai", "give me a tour"]) {
-    const r = await api(`/projects/${pid}/assistant/ask`, "POST", { question: q, screen: await page.evaluate(() => window.__strataScreen || null) });
+    const r = await api(`/projects/${pid}/assistant/ask`, "POST", { question: q, screen: await page.evaluate(() => window.__civiclensScreen || null) });
     L(`Q: ${q} -> [${r.status}] ${typeof r.body === "object" ? r.body.answer : r.body}`);
   }
   const f = await api(`/projects/${pid}/assistant/facts`);
@@ -137,14 +137,14 @@ await step("voice analyst (grounded answers)", async () => {
   L(`voice agent [${ag.status}] text=${JSON.stringify(ag.body?.text ?? ag.body).slice(0, 200)} tools=${(ag.body?.tool_calls || []).map((c) => c.name).join(",")}`);
   if (ag.status !== 200) throw new Error(`voice agent returned ${ag.status}`);
   const tts = await page.evaluate(async () => {
-    const r = await fetch("/api/v1/assistant/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "Namaste, main Strata hoon." }), credentials: "include" });
+    const r = await fetch("/api/v1/assistant/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "Namaste, main CivicLens hoon." }), credentials: "include" });
     return { status: r.status, type: r.headers.get("content-type"), bytes: (await r.arrayBuffer()).byteLength };
   });
   L(`voice tts [${tts.status}] ${tts.type} ${tts.bytes} bytes`);
   if (tts.status !== 200 || tts.bytes < 1000) throw new Error(`voice tts returned ${tts.status}, ${tts.bytes} bytes`);
   await page.goto(`${BASE}/app/projects/${pid}/market`);
   await page.waitForTimeout(4000);
-  await page.getByRole("button", { name: /Talk to Strata/ }).click();
+  await page.getByRole("button", { name: /Talk to CivicLens/ }).click();
   await shot("15-voice-dock", 4000);
 });
 

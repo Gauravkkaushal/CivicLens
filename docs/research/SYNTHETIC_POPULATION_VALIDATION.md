@@ -1,7 +1,7 @@
 # Synthetic Population Validation Report & Empirical Benchmarks
 
 **Auditor / Specialist:** Synthetic Population Specialist & Computational Social Scientist  
-**Engine Version:** StratIq Population Synthesis v2.0  
+**Engine Version:** CivicLens Population Synthesis v2.0  
 **Test Suite:** `backend/tests/test_population_synthesis.py` (5 tests passing)  
 
 ---

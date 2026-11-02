@@ -1,17 +1,17 @@
-# StratIq Agent-Based Market Simulation: ODD Protocol Specification
+# CivicLens Agent-Based Market Simulation: ODD Protocol Specification
 
 **Standard:** Grimm, V., Railsback, S. F., Vincenot, C. E., Berger, U., Gallagher, C., DeAngelis, D. L., Edmonds, B., Ge, J., Giske, J., Groeneveld, J., Johnston, A. S. A., Milles, A., Müller, M. S., Norman, W. C., Pe’er, G., Radchuk, V., Thorngate, P. W., Wynne, F., & Ayllón, D. (2020). *The ODD protocol for describing agent-based and other simulation models: A review and first update*. Ecological Modelling, 438, 109347.
 
 **Module:** `backend/app/engine/abm.py`  
 **Model Version:** `siq-abm-2.0`  
-**Auditor Reference:** StratIq Scientific Transformation Phase 7
+**Auditor Reference:** CivicLens Scientific Transformation Phase 7
 
 ---
 
 ## 1. Overview
 
 ### 1.1 Purpose and Patterns
-The StratIq Agent-Based Model (ABM) simulates the dynamic emergence of local retail and service demand over time ($t \in [1, 84]$ days). While the static discrete choice engine (`siq-choice-1.1`) evaluates equilibrium market share under stationary conditions, the ABM captures:
+The CivicLens Agent-Based Model (ABM) simulates the dynamic emergence of local retail and service demand over time ($t \in [1, 84]$ days). While the static discrete choice engine (`siq-choice-1.1`) evaluates equilibrium market share under stationary conditions, the ABM captures:
 1. **Dynamic Customer Acquisition & Awareness Diffusion:** Word-of-mouth (WOM), localized storefront foot-traffic signage, and saturating digital paid reach.
 2. **Habit Formation & Switching Inertia:** Asymmetric repeat probability and customer lock-in.
 3. **Capacity Constraints & Congestion Scars:** Turning away customers due to clinical chair / appointment or facility capacity limits, producing long-lasting negative utility memory.

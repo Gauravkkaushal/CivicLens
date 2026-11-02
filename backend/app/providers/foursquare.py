@@ -16,7 +16,7 @@ import httpx
 from ..config import get_settings
 from .http import client
 
-log = logging.getLogger("strataiq.fsq")
+log = logging.getLogger("civiclens.fsq")
 URL = "https://places-api.foursquare.com/places/search"
 VERSION = "2025-06-17"
 

@@ -18,7 +18,7 @@ import httpx
 from .categories.archetypes import ARCHETYPES
 from .config import get_settings
 
-log = logging.getLogger("strataiq.ai")
+log = logging.getLogger("civiclens.ai")
 API = "https://api.anthropic.com/v1/messages"
 
 

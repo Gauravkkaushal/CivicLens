@@ -1,4 +1,4 @@
-"""StrataIQ customer-choice and demand model (numpy, vectorised).
+"""CivicLens customer-choice and demand model (numpy, vectorised).
 
 See ``docs/MODEL.md`` for the full specification. Summary, per demand zone z,
 synthetic segment s and alternative j (j=0 is the user's business):

@@ -3,7 +3,7 @@
 Every factor declares:
 * ``scope``  — what it describes (zone, agent, business, competitor, market)
 * ``source`` — where a value can come from (osm, worldpop, derived, user, assumption, simulated)
-* ``role``   — how StrataIQ uses it:
+* ``role``   — how CivicLens uses it:
     - ``agent``    sampled into every synthetic agent's profile and used in its decisions
     - ``choice``   enters the utility / choice model directly
     - ``finance``  enters the economics

@@ -1,19 +1,19 @@
-# StratIq Empirical Validation & Baseline Benchmarking Report
+# CivicLens Empirical Validation & Baseline Benchmarking Report
 
 **Module:** `backend/tests/test_validation_benchmarks.py`  
 **Date:** October 2026  
-**Auditor Reference:** StratIq Scientific Transformation Phase 8  
+**Auditor Reference:** CivicLens Scientific Transformation Phase 8  
 
 ---
 
 ## 1. Executive Summary
 
-To establish the scientific defensibility and empirical superiority of the StratIq customer-choice architecture, we benchmarked the engine against four commercial and academic location-demand methodologies:
+To establish the scientific defensibility and empirical superiority of the CivicLens customer-choice architecture, we benchmarked the engine against four commercial and academic location-demand methodologies:
 1. **Radius Demographic Multiplier (Commercial Standard):** Homogeneous population multiplied by standard industry frequency and uniform share $1/J$.
 2. **Nearest-Competitor Tessellation (Voronoi Spatial Allocation):** Deterministic allocation of each zone's entire population to the closest facility.
 3. **Huff (1963) Gravity Model (Academic Spatial Interaction):** Probabilistic allocation driven by store attractiveness ($S_j$) decaying by power of distance ($d_{zj}^{\lambda}$).
 4. **Unsegmented Multinomial Logit:** Standard conditional logit with price and distance utilities, but lacking income-stratified willingness-to-pay (WTP) and socio-economic segmentation.
-5. **StratIq Proposed Engine (`siq-choice-1.1`):** Micro-segmented demand zones, log-normal willingness-to-pay affordability thresholds ($F_{sj}$), network travel-time impedance ($T_{zj}$), brand awareness ($a_j$), and outside good ($U_0$).
+5. **CivicLens Proposed Engine (`siq-choice-1.1`):** Micro-segmented demand zones, log-normal willingness-to-pay affordability thresholds ($F_{sj}$), network travel-time impedance ($T_{zj}$), brand awareness ($a_j$), and outside good ($U_0$).
 
 ---
 
@@ -42,8 +42,8 @@ $$V_{zj} = \beta_q (q_j - 0.5) - \beta_p \ln(p_j / p_{\text{ref}}) - \beta_d d_{
 $$P_{zj} = \frac{\exp(V_{zj})}{\sum_k \exp(V_{zk})}$$
 - **Flaws:** Treats high-income and low-income neighborhoods identically, leading to severe over-prediction of premium-priced services in low-income zones and vice versa.
 
-### 2.5 StratIq Proposed Engine (`siq-choice-1.1`)
-StratIq synthesizes socio-economic segments $s \in \{\text{Budget}, \text{Mainstream}, \text{Premium}\}$, applies procedure-level and log-normal affordability screening:
+### 2.5 CivicLens Proposed Engine (`siq-choice-1.1`)
+CivicLens synthesizes socio-economic segments $s \in \{\text{Budget}, \text{Mainstream}, \text{Premium}\}$, applies procedure-level and log-normal affordability screening:
 $$F_{sj} = 1 - \Phi\left(\frac{\ln p_j - \ln(m_s \cdot p_{\text{ref}})}{\sigma_{\text{wtp}}}\right)$$
 $$V_{zsj} = \beta_q (q_j - 0.5) - \beta_p k_s \ln(p_j / p_{\text{ref}}) - \left(\frac{\lambda}{t_s}\right) d_{zj} + \ln(a_j)$$
 $$P_{zsj} = \frac{F_{sj} \exp(V_{zsj}) \mathbf{1}_{\{d_{zj} \le \text{reach}_{s}\}}}{\exp(U_0) + \sum_k F_{sk} \exp(V_{zsk}) \mathbf{1}_{\{d_{zk} \le \text{reach}_{s}\}}}$$
@@ -53,7 +53,7 @@ $$P_{zsj} = \frac{F_{sj} \exp(V_{zsj}) \mathbf{1}_{\{d_{zj} \le \text{reach}_{s}
 ## 3. Empirical Evaluation & Quantitative Results
 
 ### 3.1 Data Generating Process (DGP)
-To avoid circular or tautological benchmarking (e.g. testing StratIq against its own output with noise), the ground truth is generated via an independent **Micro-Agent Discrete Choice Simulation**:
+To avoid circular or tautological benchmarking (e.g. testing CivicLens against its own output with noise), the ground truth is generated via an independent **Micro-Agent Discrete Choice Simulation**:
 - $N = 20,000$ individual consumer agents are sampled across demand zones proportional to residential population.
 - Each agent is assigned to a socio-economic segment $s \in \{\text{Budget}, \text{Mainstream}, \text{Premium}\}$.
 - Individual agents draw utilities across all reachable alternatives and the outside option ($U_0$).
@@ -72,13 +72,13 @@ To avoid circular or tautological benchmarking (e.g. testing StratIq against its
 
 | Model Architecture | Demand WAPE (%) (Raw) | Share-Scaled WAPE (%) | Multi-Class Brier Score | Rank |
 |---|---|---|---|---|
-| **StratIq Proposed Engine** | **0.9%** | **0.9%** | **0.0049** | **1 (Best)** |
+| **CivicLens Proposed Engine** | **0.9%** | **0.9%** | **0.0049** | **1 (Best)** |
 | Unsegmented Conditional Logit | 238.6% | 29.0% | 0.0412 | 2 |
 | Nearest-Competitor Voronoi | 248.3% | 42.1% | 0.4851 | 3 |
 | Huff Gravity Model ($\lambda=1.5$) | 238.6% | 42.5% | 0.0984 | 4 |
 | Radius Demographic Multiplier | 238.6% | 45.5% | 0.1420 | 5 |
 
-*Note: Raw WAPE for commercial baselines exceeds 200% because traditional location tools lack an outside-option reservation utility ($U_0$), falsely forcing 100% of catchment residents to purchase from the modeled providers. Even when baselines are normalized to the true total demand (Share-Scaled WAPE), StratIq's micro-segmentation outperforms them by 28–44 percentage points.*
+*Note: Raw WAPE for commercial baselines exceeds 200% because traditional location tools lack an outside-option reservation utility ($U_0$), falsely forcing 100% of catchment residents to purchase from the modeled providers. Even when baselines are normalized to the true total demand (Share-Scaled WAPE), CivicLens's micro-segmentation outperforms them by 28–44 percentage points.*
 
 ---
 
@@ -89,6 +89,6 @@ To avoid circular or tautological benchmarking (e.g. testing StratIq against its
 2. **Voronoi / Nearest-Neighbor Spatial Distortion:**
    Nearest competitor allocation suffers a **42.1% normalized WAPE** because urban consumers evaluate price and quality trade-offs rather than strictly choosing the closest facility.
 3. **Value of Micro-Segmentation:**
-   Capturing income-stratified willingness-to-pay and network travel times reduces normalized error from **29.0% (Unsegmented Logit)** to **0.9% (StratIq)**.
+   Capturing income-stratified willingness-to-pay and network travel times reduces normalized error from **29.0% (Unsegmented Logit)** to **0.9% (CivicLens)**.
 4. **Reproducibility:**
    All benchmarks are fully automated and verified via `pytest backend/tests/test_validation_benchmarks.py`.

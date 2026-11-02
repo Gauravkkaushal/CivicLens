@@ -1,4 +1,4 @@
-"""Discrete Choice Modelling Engine for StratIq.
+"""Discrete Choice Modelling Engine for CivicLens.
 
 Implements McFadden's Random Utility Maximization (RUM) framework:
 - Conditional Logit estimation via Maximum Likelihood (MLE)

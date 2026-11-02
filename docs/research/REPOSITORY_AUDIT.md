@@ -1,16 +1,16 @@
-# StratIq Repository Audit: Phase 0 Scientific & Engineering Evaluation
+# CivicLens Repository Audit: Phase 0 Scientific & Engineering Evaluation
 
 **Audit Date:** October 31, 2026  
 **Audited Head Commit:** `0883fb4` (`Docs: agent-based live market and factor engine`)  
 **Previous Identified Revision:** `c03eb2f` / `bd9a283`  
-**Repository Working Copy:** `C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\StratIq`  
+**Repository Working Copy:** `C:\Users\Lenovo\OneDrive\Desktop\INNOTECH\CivicLens`  
 **Auditor:** Principal Software Architect, Computational Social Scientist & Research Review Team  
 
 ---
 
 ## Executive Summary
 
-StratIq is an ambitious location feasibility and market intelligence system designed to answer the core business question: *"If I open a business at location $(x,y)$, what customer population, demand, competitor capture, and financial outcome are realistically expected?"*
+CivicLens is an ambitious location feasibility and market intelligence system designed to answer the core business question: *"If I open a business at location $(x,y)$, what customer population, demand, competitor capture, and financial outcome are realistically expected?"*
 
 The current codebase (at commit `0883fb4`) features a clean, well-tested Python/FastAPI backend, PostGIS spatial database, Next.js frontend, and a 615-factor registry. However, an exhaustive scientific and architectural audit reveals critical issues spanning:
 1. **P0 Classification Flaws:** Fatal category resolution ties and lexical substring overlaps (e.g. `dentist clinic` resolving to `clinic` rather than `dentist`; `medical clinic` resolving to `pharmacy`; `orthodontist` falling back to keyword string matching). Furthermore, all competitors within a project are linked to `project_id` without category/service-level scoping, leading to cross-category pollution (such as spas appearing in dental clinic competitor lists).

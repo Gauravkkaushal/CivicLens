@@ -2,7 +2,7 @@
 
 /**
  * Landing-page city, drawn as a survey blueprint: real OpenStreetMap buildings and roads, real
- * competitors fetched live through the StrataIQ API, and an ILLUSTRATIVE crowd that walks to a shop.
+ * competitors fetched live through the CivicLens API, and an ILLUSTRATIVE crowd that walks to a shop.
  *
  * The camera is scrubbed by scroll: `progress` (0..5, a ref so scrolling never re-renders React) is
  * interpolated between one camera per chapter. `scene` (the nearest whole chapter) switches layers:

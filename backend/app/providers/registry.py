@@ -70,7 +70,7 @@ SOURCES: dict[str, dict] = {
         "coverage_note": "Not independently verified.",
     },
     "model": {
-        "name": "StrataIQ model",
+        "name": "CivicLens model",
         "kind": "model",
         "license": "",
         "attribution": "",

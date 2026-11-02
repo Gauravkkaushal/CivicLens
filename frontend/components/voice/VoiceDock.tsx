@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Strata — the always-listening voice analyst.
+ * CivicLens — the always-listening voice analyst.
  *
  * Two engines, same tools:
  *  - Realtime: ElevenLabs conversational agent (full-duplex, barge-in, natural voice). The agent's
- *    "client tools" run here in the browser and fetch real numbers from the StrataIQ API.
+ *    "client tools" run here in the browser and fetch real numbers from the CivicLens API.
  *  - Browser: Web Speech API (continuous recognition) + a local Hinglish command router (./route.ts) that runs the
  *    same tools, then the backend fact router for open questions. Used automatically if the realtime engine can't start.
  * Typed questions and suggestion chips go to the realtime agent (connecting it if needed), else the local router.
@@ -39,7 +39,7 @@ interface AgentMsg {
 }
 type Phase = "idle" | "connecting" | "listening" | "thinking" | "speaking";
 interface Turn {
-  who: "you" | "strata";
+  who: "you" | "civiclens";
   text: string;
   ts: number;
 }
@@ -84,7 +84,7 @@ async function jfetch<T>(url: string, init?: RequestInit & { json?: unknown }): 
 
 const SUGGESTIONS = {
   project: ["Screen pe kya dikh raha hai?", "Best location kahan hai?", "Rent 80 hazaar kar do", "Field researcher bhejo", "Profit kaise badhega?", "Report bana do"],
-  general: ["Mujhe Indiranagar me café kholna hai", "Live demo dikhao", "Mere projects kholo", "StrataIQ kya karta hai?"],
+  general: ["Mujhe Indiranagar me café kholna hai", "Live demo dikhao", "Mere projects kholo", "CivicLens kya karta hai?"],
 };
 
 function VoiceDockInner() {
@@ -135,7 +135,7 @@ function VoiceDockInner() {
     () => ({
       get_market_facts: async () => {
         const pid = pidRef.current;
-        if (!pid) return JSON.stringify({ no_project: true, product: "StrataIQ: real OSM competitors + WorldPop population + 10,000 synthetic agents + financial model" });
+        if (!pid) return JSON.stringify({ no_project: true, product: "CivicLens: real OSM competitors + WorldPop population + 10,000 synthetic agents + financial model" });
         try {
           return JSON.stringify(await jfetch(`/api/v1/projects/${pid}/assistant/facts`));
         } catch (e) {
@@ -178,7 +178,7 @@ function VoiceDockInner() {
           const out = await jfetch<{ current: Record<string, unknown>; top: Record<string, unknown>[]; uplift_profit: number; method: string; unit: string }>(
             `/api/v1/projects/${pid}/sites${sc?.scenario_id ? `?scenario_id=${sc.scenario_id}` : ""}`);
           if (!pathRef.current.endsWith("/market")) router.push(`/app/projects/${pid}/market?tab=sites`);
-          setTimeout(() => window.dispatchEvent(new CustomEvent("strataiq:sites")), 600);
+          setTimeout(() => window.dispatchEvent(new CustomEvent("civiclens:sites")), 600);
           const slim = (x: Record<string, unknown>) => ({ profit_per_month: x.profit, demand: x.demand, units: x.units, capacity: x.capacity, from_current_km: x.from_current_km,
             people_within_1km: x.people_within_1km, competitors_within_500m: x.competitors_within_500m, nearest_competitor_km: x.nearest_competitor_km, risk: x.risk });
           return JSON.stringify({ unit: out.unit, current_site: slim(out.current), best_sites: out.top.slice(0, 3).map(slim), uplift_profit_per_month: out.uplift_profit,
@@ -195,7 +195,7 @@ function VoiceDockInner() {
           const out = await jfetch<{ current: Record<string, number>; best: Record<string, number>; best_without_new_capacity: Record<string, number>; evaluated: number; cost_note: string; unit: string }>(
             `/api/v1/projects/${pid}/optimize${sc?.scenario_id ? `?scenario_id=${sc.scenario_id}` : ""}`);
           if (!pathRef.current.endsWith("/live")) router.push(`/app/projects/${pid}/live`);
-          setTimeout(() => window.dispatchEvent(new CustomEvent("strataiq:optimize")), pathRef.current.endsWith("/live") ? 0 : 1800);
+          setTimeout(() => window.dispatchEvent(new CustomEvent("civiclens:optimize")), pathRef.current.endsWith("/live") ? 0 : 1800);
           const pick = (x: Record<string, number>) => ({ price: x.price, marketing_spend: x.marketing_spend, capacity_scale: x.capacity_scale, units: x.units, demand: x.demand, profit_per_month: x.profit, payback_months: x.payback_months, risk: (x as unknown as { risk?: unknown }).risk });
           return JSON.stringify({ unit: out.unit, combinations_tested: out.evaluated, current: pick(out.current), best: pick(out.best), best_without_new_capacity: pick(out.best_without_new_capacity),
             cost_note: out.cost_note, next: "Offer to verify the best with test_strategy (only the changed fields)." });
@@ -221,7 +221,7 @@ function VoiceDockInner() {
         return JSON.stringify(hit ? { term: hit[0], meaning: hit[1] } : { term, meaning: null, glossary_terms: GLOSSARY.map(([k]) => k) });
       },
       open_guide: async () => {
-        window.dispatchEvent(new CustomEvent("strataiq:tour"));
+        window.dispatchEvent(new CustomEvent("civiclens:tour"));
         return "Opened the five-step 'How it works' guide on screen.";
       },
       test_price: async ({ price }: { price: number }) => {
@@ -229,7 +229,7 @@ function VoiceDockInner() {
         if (!pid) return JSON.stringify({ error: "Open a project first." });
         try {
           const out = await jfetch<Record<string, unknown>>(`/api/v1/projects/${pid}/assistant/try-price`, { method: "POST", json: { price: Number(price) } });
-          window.dispatchEvent(new CustomEvent("strataiq:refresh"));
+          window.dispatchEvent(new CustomEvent("civiclens:refresh"));
           return JSON.stringify(out);
         } catch (e) {
           return JSON.stringify({ error: e instanceof Error ? e.message : "simulation failed" });
@@ -260,7 +260,7 @@ function VoiceDockInner() {
           const before = base.latest_run ? await jfetch<RunLite>(`/api/v1/simulation-runs/${base.latest_run.id}/results`).catch(() => null) : null;
           await jfetch(`/api/v1/scenarios/${base.id}`, { method: "PATCH", json: { inputs: { ...base.inputs, ...changes } } });
           const run = await jfetch<RunLite>(`/api/v1/scenarios/${base.id}/runs`, { method: "POST" });
-          window.dispatchEvent(new CustomEvent("strataiq:refresh"));
+          window.dispatchEvent(new CustomEvent("civiclens:refresh"));
           if (run.status !== "succeeded") return JSON.stringify({ changed: changes, error: run.error || "simulation failed" });
           return JSON.stringify({ changed: changes, before: slimRun(before), after: slimRun(run), note: "Saved to the baseline plan and re-simulated." });
         } catch (e) {
@@ -284,7 +284,7 @@ function VoiceDockInner() {
           if (s.status === "failed") return JSON.stringify({ status: "failed", note: "Live data could not load right now." });
           const base = p.scenarios.find((x) => x.is_baseline);
           const run = base ? await jfetch<RunLite>(`/api/v1/scenarios/${base.id}/runs`, { method: "POST" }) : null;
-          window.dispatchEvent(new CustomEvent("strataiq:refresh"));
+          window.dispatchEvent(new CustomEvent("civiclens:refresh"));
           return JSON.stringify({ status: s.status, simulation: slimRun(run) });
         } catch (e) {
           return JSON.stringify({ error: e instanceof Error ? e.message : "load failed" });
@@ -298,7 +298,7 @@ function VoiceDockInner() {
             method: "POST", json: { researcher_name: researcher_name || "", brief: brief || "" },
           });
           router.push(`/app/projects/${pid}/field`);
-          window.dispatchEvent(new CustomEvent("strataiq:refresh"));
+          window.dispatchEvent(new CustomEvent("civiclens:refresh"));
           return JSON.stringify({ requested: true, specialty: f.specialty, status: f.request.status, field_link: `${window.location.origin}/field/${f.request.token}`,
             note: "The Field data page is open; the user can copy the link and send it to the researcher on WhatsApp." });
         } catch (e) {
@@ -324,7 +324,7 @@ function VoiceDockInner() {
           }
           await jfetch(`/api/v1/projects/${pid}/field/records`, { method: "POST", json: { kind, data, lat, lng, collected_by: "Owner (voice)" } });
           const f = await jfetch<{ summary: unknown }>(`/api/v1/projects/${pid}/field`);
-          window.dispatchEvent(new CustomEvent("strataiq:refresh"));
+          window.dispatchEvent(new CustomEvent("civiclens:refresh"));
           return JSON.stringify({ saved: kind, summary: f.summary, note: kind === "competitor" ? "Pinned at the site location. For the exact spot, record it from the field app with GPS." : undefined });
         } catch (e) {
           return JSON.stringify({ error: e instanceof Error ? e.message : "could not save" });
@@ -376,7 +376,7 @@ function VoiceDockInner() {
         if (!pid) return JSON.stringify({ error: "Open a project first." });
         try {
           await jfetch(`/api/v1/projects/${pid}`, { method: "PATCH", json: { decision_goal: goal } });
-          window.dispatchEvent(new CustomEvent("strataiq:refresh"));
+          window.dispatchEvent(new CustomEvent("civiclens:refresh"));
           return JSON.stringify({ goal });
         } catch (e) {
           return JSON.stringify({ error: e instanceof Error ? e.message : "failed" });
@@ -421,7 +421,7 @@ function VoiceDockInner() {
       const text = m?.message ?? m?.text;
       const src = m?.source ?? m?.role;
       if (src !== "user") agentSpoke.current = true;
-      if (text) push(src === "user" ? "you" : "strata", String(text));
+      if (text) push(src === "user" ? "you" : "civiclens", String(text));
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (e: any) => {
@@ -580,7 +580,7 @@ function VoiceDockInner() {
           method: "POST",
           json: { question: q, page: path, screen: readScreen(), suggested: lastSuggested.current },
         });
-        push("strata", out.answer);
+        push("civiclens", out.answer);
         if (out.suggested) lastSuggested.current = out.suggested;
         const onLive = path.endsWith("/live");
         for (const a of out.actions || []) {
@@ -590,7 +590,7 @@ function VoiceDockInner() {
           }
           if (a.type === "sites" && pid) {
             if (!path.endsWith("/market")) router.push(`/app/projects/${pid}/market?tab=sites`);
-            setTimeout(() => window.dispatchEvent(new CustomEvent("strataiq:sites")), 600);
+            setTimeout(() => window.dispatchEvent(new CustomEvent("civiclens:sites")), 600);
             continue;
           }
           if (a.type === "quickstart" && a.text) {
@@ -602,14 +602,14 @@ function VoiceDockInner() {
             continue;
           }
           if (a.type === "navigate" && a.to === "live" && onLive) continue;
-          if (a.type === "refresh") window.dispatchEvent(new CustomEvent("strataiq:refresh"));
+          if (a.type === "refresh") window.dispatchEvent(new CustomEvent("civiclens:refresh"));
           if (a.type === "navigate" && a.to) router.push(a.to.startsWith("/") ? a.to : pid ? `/app/projects/${pid}/${a.to}` : "/app");
           if (a.type === "demo") void tools.start_demo();
         }
         await speak(out.answer);
       } catch (e) {
         const msg = e instanceof Error ? e.message : "I couldn't reach the server.";
-        push("strata", msg);
+        push("civiclens", msg);
         await speak(msg);
       }
     },
@@ -641,7 +641,7 @@ function VoiceDockInner() {
         }
         h.push({ role: "assistant", content: res.text || "", toolCalls: res.tool_calls });
         if (res.text) {
-          push("strata", res.text);
+          push("civiclens", res.text);
           void speak(res.text);
         }
         for (const tc of res.tool_calls) {
@@ -672,7 +672,7 @@ function VoiceDockInner() {
       try {
         const ans = await agentTurn(q);
         if (ans) {
-          push("strata", ans);
+          push("civiclens", ans);
           await speak(ans);
           return;
         }
@@ -682,25 +682,25 @@ function VoiceDockInner() {
         if (toolRan.current) {
           // the action already happened; running the fallback router would do it twice
           const msg = "Kaam kar diya hai, screen pe dekh lo. Bas jawab bolne me dikkat aayi — kuch aur poochna ho to bolo.";
-          push("strata", msg);
+          push("civiclens", msg);
           await speak(msg);
           return;
         }
       }
       try {
         const say = (line: string) => {
-          push("strata", line);
+          push("civiclens", line);
           void speak(line);
         };
         const ans = await route(q, tools as unknown as Tools, { projectOpen: !!pidRef.current, say });
         if (ans) {
-          push("strata", ans);
+          push("civiclens", ans);
           await speak(ans);
           return;
         }
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Kuch gadbad ho gayi.";
-        push("strata", msg);
+        push("civiclens", msg);
         await speak(msg);
         return;
       }
@@ -944,7 +944,7 @@ function VoiceDockInner() {
   };
 
   const statusText: Record<Phase, string> = {
-    idle: "Ask Strata",
+    idle: "Ask CivicLens",
     connecting: "Connecting",
     listening: "Listening",
     thinking: "Checking the numbers",
@@ -956,7 +956,7 @@ function VoiceDockInner() {
   return (
     <div data-voice-dock className="no-print pointer-events-none fixed bottom-5 right-5 z-[90] flex flex-col items-end gap-3">
       {open && (
-        <div className="panel rise pointer-events-auto w-[min(400px,calc(100vw-2.5rem))] overflow-hidden rounded-2xl" role="dialog" aria-label="Strata voice analyst">
+        <div className="panel rise pointer-events-auto w-[min(400px,calc(100vw-2.5rem))] overflow-hidden rounded-2xl" role="dialog" aria-label="CivicLens voice analyst">
           <div className="flex items-center gap-4 px-5 pt-5">
             <Orb level={level} phase={phase} size={64} />
             <div className="min-w-0 flex-1">
@@ -973,7 +973,7 @@ function VoiceDockInner() {
           <div className="mt-4 max-h-64 space-y-2.5 overflow-y-auto px-5 pb-1 text-[13.5px] leading-relaxed">
             {turns.length === 0 && !interim && (
               <p className="text-ink-400">
-                Bas bolo — Hinglish, Hindi ya English. Strata khud project banata hai, data load karta hai, plan badalta hai, researcher bhejta hai aur report banata hai. Har number simulation se aata hai, guess se nahi.
+                Bas bolo — Hinglish, Hindi ya English. CivicLens khud project banata hai, data load karta hai, plan badalta hai, researcher bhejta hai aur report banata hai. Har number simulation se aata hai, guess se nahi.
               </p>
             )}
             {turns.map((t) => (
@@ -1044,13 +1044,13 @@ function VoiceDockInner() {
       <button
         onClick={() => (open ? (active ? void stop() : void start()) : (setOpen(true), void start()))}
         className="group pointer-events-auto flex items-center rounded-full border border-black/[0.08] bg-white/90 p-1.5 shadow-[0_1px_2px_rgba(13,16,40,.05),0_18px_40px_-16px_rgba(13,16,40,.35)] backdrop-blur-xl transition-[border-color,transform] duration-500 hover:-translate-y-0.5 hover:border-accent/40"
-        aria-label={active ? "Stop voice analyst" : "Talk to Strata, the voice analyst"}
-        title="Strata se baat karo · press V"
+        aria-label={active ? "Stop voice analyst" : "Talk to CivicLens, the voice analyst"}
+        title="CivicLens se baat karo · press V"
       >
         <Orb level={level} phase={phase} size={40} />
         {/* compact by default so it never covers page actions; the label slides out on hover or while talking */}
         <span className={cn("overflow-hidden whitespace-nowrap text-left transition-[max-width,padding] duration-500", active ? "max-w-60 pl-3 pr-3" : "max-w-0 group-hover:max-w-60 group-hover:pl-3 group-hover:pr-3")}>
-          <span className="block text-[13px] font-medium text-ink-100">{active ? statusText[phase] : "Strata se baat karo"}</span>
+          <span className="block text-[13px] font-medium text-ink-100">{active ? statusText[phase] : "CivicLens se baat karo"}</span>
           <span className="block text-[11px] text-ink-400">{active ? "tap to stop" : "press V · Hinglish"}</span>
         </span>
       </button>

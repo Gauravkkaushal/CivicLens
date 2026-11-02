@@ -28,7 +28,7 @@ def guest(response: Response, db: Session = Depends(get_db)):
     """One-click guest workspace for judges and first-time visitors (random credentials, private to this browser)."""
     import secrets
     tag = secrets.token_hex(5)
-    user = User(email=f"guest-{tag}@guest.strataiq.app", name="Guest", password_hash=hash_password(secrets.token_urlsafe(24)),
+    user = User(email=f"guest-{tag}@guest.civiclens.app", name="Guest", password_hash=hash_password(secrets.token_urlsafe(24)),
                 preferences={"guest": True})
     db.add(user)
     db.commit()

@@ -1,4 +1,4 @@
-# StratIq Master Scientific Re-Engineering & Production Implementation Plan
+# CivicLens Master Scientific Re-Engineering & Production Implementation Plan
 
 **Date:** October 31, 2026  
 **Audited Head Commit:** `0883fb4`  
@@ -8,7 +8,7 @@
 
 ## 1. Overview and Phasing Strategy
 
-This document details the complete architectural and scientific transformation of StratIq from a heuristic-driven simulation into an evidence-constrained, empirically calibrated spatial market feasibility platform.
+This document details the complete architectural and scientific transformation of CivicLens from a heuristic-driven simulation into an evidence-constrained, empirically calibrated spatial market feasibility platform.
 
 ### Strict Non-Negotiables:
 1. **No arbitrary parameter assignment.**
@@ -184,8 +184,8 @@ This document details the complete architectural and scientific transformation o
   2. Baseline 2: Nearest-competitor allocation.
   3. Baseline 3: Standard Huff (1963) gravity model.
   4. Baseline 4: Basic Conditional Logit without spatial segmentation.
-  5. Baseline 5: StratIq existing model (`siq-choice-1.1`).
-  6. Proposed: StratIq Evidence-Constrained Spatially Calibrated Model.
+  5. Baseline 5: CivicLens existing model (`siq-choice-1.1`).
+  6. Proposed: CivicLens Evidence-Constrained Spatially Calibrated Model.
 - **Ablation Studies:**
   - Model without travel-time impedance.
   - Model without competitor relationship classification.

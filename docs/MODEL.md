@@ -1,4 +1,4 @@
-# StrataIQ simulation model (`siq-choice-1.1`)
+# CivicLens simulation model (`siq-choice-1.1`)
 
 Source: `backend/app/engine/`. Tests: `backend/tests/test_engine.py`.
 

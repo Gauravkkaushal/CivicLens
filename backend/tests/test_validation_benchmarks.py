@@ -1,11 +1,11 @@
-"""Scientific benchmark tests and empirical validation suite comparing StratIq against 4 industry baselines.
+"""Scientific benchmark tests and empirical validation suite comparing CivicLens against 4 industry baselines.
 
 Baselines evaluated:
 1. Radius Population Multiplier (Demographic proportional allocation)
 2. Nearest Competitor Voronoi Allocation (Zero-gravity spatial boundary)
 3. Classical Huff (1963) Retail Gravity Model
 4. Unsegmented Conditional Logit (Homogeneous MNL)
-5. StratIq Evidence-Constrained Spatially Calibrated Model
+5. CivicLens Evidence-Constrained Spatially Calibrated Model
 
 Metrics computed:
 - Mean Absolute Error (MAE)
@@ -95,7 +95,7 @@ def compute_brier(actual_probs: np.ndarray, predicted_probs: np.ndarray) -> floa
 
 
 def test_validation_benchmarks_scientific_superiority():
-    """Verify StratIq achieves strictly lower WAPE and Brier score than naive & unsegmented baselines."""
+    """Verify CivicLens achieves strictly lower WAPE and Brier score than naive & unsegmented baselines."""
     # Setup realistic synthetic multi-zone urban environment
     arch = ARCHETYPES["takeaway"]
     np.random.seed(42)
@@ -117,13 +117,13 @@ def test_validation_benchmarks_scientific_superiority():
     )
     params = ResolvedParams.from_archetype(arch)
 
-    # 1. StratIq execution with travel time
+    # 1. CivicLens execution with travel time
     m = build_arrays(arch, zones, comps, biz, params)
     pv = params.draws(1, None)
-    stratiq_res = run_choice(arch, m, biz, pv, keep_detail=True)
-    stratiq_units = stratiq_res["units_by_alt"][0]  # [J]
-    P_matrix = stratiq_res["P"][0]  # [Z, S, J]
-    N_mat = stratiq_res["N"][0]  # [Z, S]
+    civiclens_res = run_choice(arch, m, biz, pv, keep_detail=True)
+    civiclens_units = civiclens_res["units_by_alt"][0]  # [J]
+    P_matrix = civiclens_res["P"][0]  # [Z, S, J]
+    N_mat = civiclens_res["N"][0]  # [Z, S]
     part = params.values["participation"]
     freq = params.values["frequency"]
 
@@ -168,7 +168,7 @@ def test_validation_benchmarks_scientific_superiority():
             ground_truth_probs[z, :] = 1.0 / J
 
     raw_probs = P_matrix.mean(axis=1)  # [Z, J]
-    stratiq_norm_probs = raw_probs / np.sum(raw_probs, axis=1, keepdims=True)
+    civiclens_norm_probs = raw_probs / np.sum(raw_probs, axis=1, keepdims=True)
 
     # 3. Run Baselines
     n_comps = len(comps)
@@ -186,7 +186,7 @@ def test_validation_benchmarks_scientific_superiority():
     b4_units = BenchmarkModels.unsegmented_logit(zones, dist_matrix, prices, qualities, part, freq)
 
     # Calculate WAPE on raw units
-    wape_stratiq = compute_wape(ground_truth_units, stratiq_units)
+    wape_civiclens = compute_wape(ground_truth_units, civiclens_units)
     wape_b1 = compute_wape(ground_truth_units, b1_units)
     wape_b2 = compute_wape(ground_truth_units, b2_units)
     wape_b3 = compute_wape(ground_truth_units, b3_units)
@@ -200,20 +200,20 @@ def test_validation_benchmarks_scientific_superiority():
     wape_b4_share = compute_wape(ground_truth_units, (b4_units / np.sum(b4_units)) * tot_dgp)
 
     # Scientific Superiority Assertions:
-    # 1. StratIq must achieve dramatically lower WAPE than all raw baselines (which ignore outside options)
-    assert wape_stratiq < wape_b1, f"StratIq WAPE ({wape_stratiq:.3f}) >= Radius Baseline ({wape_b1:.3f})"
-    assert wape_stratiq < wape_b2, f"StratIq WAPE ({wape_stratiq:.3f}) >= Nearest Competitor Baseline ({wape_b2:.3f})"
-    assert wape_stratiq < wape_b3, f"StratIq WAPE ({wape_stratiq:.3f}) >= Huff Gravity Baseline ({wape_b3:.3f})"
-    assert wape_stratiq < wape_b4, f"StratIq WAPE ({wape_stratiq:.3f}) >= Unsegmented Logit Baseline ({wape_b4:.3f})"
+    # 1. CivicLens must achieve dramatically lower WAPE than all raw baselines (which ignore outside options)
+    assert wape_civiclens < wape_b1, f"CivicLens WAPE ({wape_civiclens:.3f}) >= Radius Baseline ({wape_b1:.3f})"
+    assert wape_civiclens < wape_b2, f"CivicLens WAPE ({wape_civiclens:.3f}) >= Nearest Competitor Baseline ({wape_b2:.3f})"
+    assert wape_civiclens < wape_b3, f"CivicLens WAPE ({wape_civiclens:.3f}) >= Huff Gravity Baseline ({wape_b3:.3f})"
+    assert wape_civiclens < wape_b4, f"CivicLens WAPE ({wape_civiclens:.3f}) >= Unsegmented Logit Baseline ({wape_b4:.3f})"
 
-    # 2. Even when baselines are normalized to true market size, StratIq is strictly superior:
-    assert wape_stratiq < wape_b1_share
-    assert wape_stratiq < wape_b2_share
-    assert wape_stratiq < wape_b3_share
-    assert wape_stratiq < wape_b4_share
+    # 2. Even when baselines are normalized to true market size, CivicLens is strictly superior:
+    assert wape_civiclens < wape_b1_share
+    assert wape_civiclens < wape_b2_share
+    assert wape_civiclens < wape_b3_share
+    assert wape_civiclens < wape_b4_share
 
-    # StratIq matches the true DGP within Monte Carlo convergence tolerance (< 0.03)
-    assert wape_stratiq < 0.03, f"StratIq WAPE too high against DGP: {wape_stratiq:.4f}"
+    # CivicLens matches the true DGP within Monte Carlo convergence tolerance (< 0.03)
+    assert wape_civiclens < 0.03, f"CivicLens WAPE too high against DGP: {wape_civiclens:.4f}"
 
     # Verify Brier Score improvement against Nearest Competitor and Uniform Allocation
     nearest_probs = np.zeros_like(ground_truth_probs)
@@ -221,15 +221,15 @@ def test_validation_benchmarks_scientific_superiority():
         nearest_probs[z_idx, int(np.argmin(dist_matrix[z_idx]))] = 1.0
 
     uniform_probs = np.full_like(ground_truth_probs, 1.0 / ground_truth_probs.shape[1])
-    brier_stratiq = compute_brier(ground_truth_probs, stratiq_norm_probs)
+    brier_civiclens = compute_brier(ground_truth_probs, civiclens_norm_probs)
     brier_nearest = compute_brier(ground_truth_probs, nearest_probs)
     brier_uniform = compute_brier(ground_truth_probs, uniform_probs)
 
-    assert brier_stratiq < brier_nearest, (
-        f"StratIq Brier ({brier_stratiq:.4f}) must be superior to Nearest Brier ({brier_nearest:.4f})"
+    assert brier_civiclens < brier_nearest, (
+        f"CivicLens Brier ({brier_civiclens:.4f}) must be superior to Nearest Brier ({brier_nearest:.4f})"
     )
-    assert brier_stratiq < brier_uniform, (
-        f"StratIq Brier ({brier_stratiq:.4f}) must be superior to uniform Brier ({brier_uniform:.4f})"
+    assert brier_civiclens < brier_uniform, (
+        f"CivicLens Brier ({brier_civiclens:.4f}) must be superior to uniform Brier ({brier_uniform:.4f})"
     )
 
 

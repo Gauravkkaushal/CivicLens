@@ -13,14 +13,14 @@ jobs:
       db:
         image: postgis/postgis:16-3.4
         env:
-          POSTGRES_USER: strataiq
-          POSTGRES_PASSWORD: strataiq
-          POSTGRES_DB: strataiq
+          POSTGRES_USER: civiclens
+          POSTGRES_PASSWORD: civiclens
+          POSTGRES_DB: civiclens
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U strataiq" --health-interval 5s --health-timeout 5s --health-retries 20
+          --health-cmd "pg_isready -U civiclens" --health-interval 5s --health-timeout 5s --health-retries 20
     env:
-      DATABASE_URL: postgresql://strataiq:strataiq@localhost:5432/strataiq
+      DATABASE_URL: postgresql://civiclens:civiclens@localhost:5432/civiclens
       JWT_SECRET: ci-secret-not-for-production
     defaults:
       run:
@@ -127,14 +127,14 @@ jobs:
       db:
         image: postgis/postgis:16-3.4
         env:
-          POSTGRES_USER: strataiq
-          POSTGRES_PASSWORD: strataiq
-          POSTGRES_DB: strataiq
+          POSTGRES_USER: civiclens
+          POSTGRES_PASSWORD: civiclens
+          POSTGRES_DB: civiclens
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U strataiq" --health-interval 5s --health-timeout 5s --health-retries 20
+          --health-cmd "pg_isready -U civiclens" --health-interval 5s --health-timeout 5s --health-retries 20
     env:
-      DATABASE_URL: postgresql://strataiq:strataiq@localhost:5432/strataiq
+      DATABASE_URL: postgresql://civiclens:civiclens@localhost:5432/civiclens
       JWT_SECRET: ci-secret-not-for-production
       CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
       API_URL: http://127.0.0.1:8000

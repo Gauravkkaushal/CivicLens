@@ -18,7 +18,7 @@ from ..services.runs import competitors_for, latest_runs, latest_snapshot, loadi
 from .serialize import competitor_out, location_out, project_out, scenario_out, snapshot_out
 
 router = APIRouter(tags=["projects"])
-log = logging.getLogger("strataiq.api")
+log = logging.getLogger("civiclens.api")
 
 LOCATION_LABELS = ["Location A", "Location B", "Location C", "Location D", "Location E"]
 

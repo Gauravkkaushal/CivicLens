@@ -16,12 +16,12 @@ export function LogoMark({ size = 24, tone = "light" }: { size?: number; tone?: 
 /** `tone="dark"` sits on night or cobalt grounds. */
 export function Logo({ href = "/", compact = false, tone = "light" }: { href?: string; compact?: boolean; tone?: "light" | "dark" }) {
   return (
-    <Link href={href} className={cn("group flex items-center gap-2.5", tone === "dark" ? "text-white" : "text-ink-100")} aria-label="StrataIQ home">
+    <Link href={href} className={cn("group flex items-center gap-2.5", tone === "dark" ? "text-white" : "text-ink-100")} aria-label="CivicLens home">
       <LogoMark tone={tone} />
       {!compact && (
         <span className="flex items-baseline gap-1.5">
-          <span className="lp-wide text-[16px] tracking-[-0.02em]">StrataIQ</span>
-          <span className={cn("font-deva text-[13px] transition-colors group-hover:text-accent", tone === "dark" ? "text-white/45" : "text-ink-400")} lang="hi">स्तर</span>
+          <span className="lp-wide text-[16px] tracking-[-0.02em]">CivicLens</span>
+          <span className={cn("font-deva text-[13px] transition-colors group-hover:text-accent", tone === "dark" ? "text-white/45" : "text-ink-400")} lang="hi">दृष्टि</span>
         </span>
       )}
     </Link>

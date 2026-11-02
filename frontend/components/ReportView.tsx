@@ -50,7 +50,7 @@ export function ReportView({ c }: { c: ReportContent }) {
     <article className="print-light mx-auto max-w-4xl rounded-lg border border-black/[0.07] bg-ink-950 p-6 text-sm leading-relaxed text-ink-200 md:p-10">
       {c.project.is_demo && <div className="mb-4 rounded border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-800">DEMO SCENARIO — Illustrative market data; not verified live conditions.</div>}
       <header>
-        <div className="text-xsst text-ink-400">StrataIQ feasibility report</div>
+        <div className="text-xsst text-ink-400">CivicLens feasibility report</div>
         <h1 className="mt-1 text-2xl font-semibold text-ink-100">{c.project.name}</h1>
         <p className="mt-1 text-xs text-ink-400">Generated {when(c.generated_at)} · model {d.model_version || "—"}</p>
         <p className="mt-3 rounded border border-black/[0.07] bg-ink-900 p-3 text-xs text-ink-300">{c.disclaimer}</p>

@@ -2,7 +2,7 @@
 # so set DATABASE_URL in the Render dashboard. The frontend is a separate Render Node service (root: frontend/).
 services:
   - type: web
-    name: strataiq-api
+    name: civiclens-api
     runtime: docker
     rootDir: backend
     plan: free

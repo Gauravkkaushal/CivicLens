@@ -163,7 +163,7 @@ export default function FieldResearch() {
               </ol>
               <div className="grid gap-3 p-6 sm:grid-cols-2">
                 <label className="space-y-1.5 text-xs text-ink-300">Researcher name <span className="text-ink-500">(optional)</span>
-                  <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="Assigned by StrataIQ if empty" maxLength={120} />
+                  <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="Assigned by CivicLens if empty" maxLength={120} />
                 </label>
                 <label className="space-y-1.5 text-xs text-ink-300">Needed by
                   <input type="date" className={inputCls} value={due} onChange={(e) => setDue(e.target.value)} />

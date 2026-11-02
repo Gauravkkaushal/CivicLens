@@ -1,4 +1,4 @@
-# StratIq Audit System Changelog
+# CivicLens Audit System Changelog
 
 All chronological entries regarding audit system initialization, primary agent checkpoints, discovered issues, and verified resolutions are recorded here. Never overwrite previous entries.
 
@@ -7,7 +7,7 @@ All chronological entries regarding audit system initialization, primary agent c
 ## [2026-10-31] — Baseline Audit Initialization (Checkpoint 0)
 
 ### Audit Event: Baseline Inspection & Framework Setup
-- **Auditor**: Independent Engineering Auditor (`stratiq-watch`)
+- **Auditor**: Independent Engineering Auditor (`civiclens-watch`)
 - **Git Commit**: `0883fb4` (`Docs: agent-based live market and factor engine`)
 - **Git Branch**: `main`
 
@@ -24,7 +24,7 @@ All chronological entries regarding audit system initialization, primary agent c
    - Initialized `docs/audit/DECISIONS.md`
    - Initialized `docs/audit/AGENT_ACTIVITY.md`
 3. **Auditor Skill Creation**:
-   - Created reusable Antigravity skill `.agents/skills/stratiq-watch/SKILL.md` (both in project workspace and global `.agents/skills`).
+   - Created reusable Antigravity skill `.agents/skills/civiclens-watch/SKILL.md` (both in project workspace and global `.agents/skills`).
 4. **Baseline Test Execution**:
    - Executed `pytest -v` across `backend/tests/`: 27 passed, 9 skipped (PostGIS DB & live network tests skipped by design).
    - Attempted frontend typecheck: noted missing `node_modules` in local workspace.
@@ -41,7 +41,7 @@ All chronological entries regarding audit system initialization, primary agent c
 ## [2026-10-31] — Primary Agent Checkpoint 1 (PARAMETER_EVIDENCE_AUDIT.csv)
 
 ### Audit Event: Detection of 615-Parameter Evidence Audit
-- **Auditor**: Independent Engineering Auditor (`stratiq-watch`)
+- **Auditor**: Independent Engineering Auditor (`civiclens-watch`)
 - **Timestamp**: 2026-10-31T05:04:30Z
 - **Changes Detected**:
   - Untracked file created: `docs/research/PARAMETER_EVIDENCE_AUDIT.csv` (168 KB).
@@ -58,7 +58,7 @@ All chronological entries regarding audit system initialization, primary agent c
 ## [2026-10-31] — Primary Agent Checkpoint 2 (Phase 1 P0 Fixes, Population Synthesis & Dental Economics)
 
 ### Audit Event: Codebase Mutation & Independent Verification
-- **Auditor**: Independent Engineering Auditor (`stratiq-watch`)
+- **Auditor**: Independent Engineering Auditor (`civiclens-watch`)
 - **Timestamp**: 2026-10-31T05:30:00Z
 - **Working Tree Delta**:
   - Modified: `backend/app/categories/resolver.py`, `backend/app/categories/taxonomy.py`, `backend/app/categories/competitors.py`, `backend/app/services/runs.py`, `backend/app/api/serialize.py`, `backend/app/api/projects.py`.
@@ -93,7 +93,7 @@ All chronological entries regarding audit system initialization, primary agent c
 ## [2026-10-31] — Independent Engineering Audit Checkpoint 3 (Boosted Deep-Dive)
 
 ### Audit Event: Full Spectrum Verification, Runtime Bug Detection & Scientific Scrutiny
-- **Auditor**: Independent Engineering Auditor (`stratiq-watch`)
+- **Auditor**: Independent Engineering Auditor (`civiclens-watch`)
 - **Timestamp**: 2026-10-31T05:55:00Z
 - **Working Tree Delta**:
   - New Test Suites Detected:
@@ -122,7 +122,7 @@ All chronological entries regarding audit system initialization, primary agent c
    - `backend/app/services/runs.py:173` only accepts 4 parameters and lacks `direct_only`.
    - Raises `TypeError: competitors_for() got an unexpected keyword argument 'direct_only'`, crashing `GET /projects/{id}/market` with a 500 Internal Server Error.
 2. **Circular Benchmark Validation Fallacy ([SIQ-ISSUE-011])**:
-   - `backend/tests/test_validation_benchmarks.py:129-132` generates "ground truth" by multiplying StratIq's own output by `uniform(0.97, 1.03)`.
+   - `backend/tests/test_validation_benchmarks.py:129-132` generates "ground truth" by multiplying CivicLens's own output by `uniform(0.97, 1.03)`.
    - `docs/research/EXPERIMENTS.md` claims "Empirical Evaluation" and a 1.2% WAPE against Huff gravity and Voronoi models based on this circular data.
    - Violated non-negotiable rule #4 ("No claiming empirical calibration when only internal consistency tests exist"). Reclassified as a synthetic structural separability check.
 3. **Subsystem Disconnection Extended ([SIQ-ISSUE-007])**:
