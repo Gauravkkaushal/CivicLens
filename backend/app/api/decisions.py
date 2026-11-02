@@ -63,11 +63,8 @@ def _report_content(db: Session, p: Project) -> dict:
     d = _decision(db, p, None)
     runs = latest_runs(db, p)
     locs = []
-    settlement_type = None
     for l in p.locations:
         snap = latest_snapshot(db, l.id)
-        if snap and snap.population:
-            settlement_type = settlement_type or snap.population.get("settlement_type")
         locs.append({"location": location_out(l), "snapshot": None if not snap else {
             "retrieved_at": iso(snap.retrieved_at), "status": snap.status, "catchment_method": snap.catchment_method,
             "population": snap.population, "coverage": snap.coverage, "sources": snap.sources, "errors": snap.errors,
@@ -84,6 +81,10 @@ def _report_content(db: Session, p: Project) -> dict:
         } | {"sensitivity": {k: (r.results.get("sensitivity") or {}).get(k) for k in ("tornado", "stress_tests", "thresholds", "price_curve")}}})
     if not baseline_scenario and p.scenarios:
         baseline_scenario = p.scenarios[0]
+
+    base_loc_id = baseline_scenario.location_id if baseline_scenario else (p.locations[0].id if p.locations else None)
+    base_snap = latest_snapshot(db, base_loc_id) if base_loc_id else None
+    settlement_type = (base_snap.population or {}).get("settlement_type") if (base_snap and base_snap.population) else None
 
     startup_cost = 0.0
     if baseline_scenario and baseline_scenario.inputs:

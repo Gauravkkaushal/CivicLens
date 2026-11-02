@@ -113,10 +113,13 @@ async def _adopt(project_id: str, body: dict) -> dict:
         except ProviderError as e:
             raise HTTPException(502, f"Market data could not be loaded for the new site: {e.message[:160]}") from e
         runs = latest_runs(db, p)
-        if src.id not in runs:
-            await run_in_threadpool(_run_sync, p.id, src.id)
-            runs = latest_runs(db, p)
-        r0 = runs[src.id]
+        r0 = runs.get(src.id)
+        if not r0:
+            r0_id = await run_in_threadpool(_run_sync, p.id, src.id)
+            db.expire_all()
+            r0 = db.get(SimulationRun, r0_id)
+            if r0 is None or r0.status != "succeeded":
+                raise HTTPException(422, (r0.error if r0 else None) or "Source simulation failed")
         s = Scenario(project_id=p.id, location_id=loc.id, name=f"{src.name} at {label}"[:120], is_baseline=False, inputs=copy.deepcopy(src.inputs))
         db.add(s)
         p.updated_at = utcnow()

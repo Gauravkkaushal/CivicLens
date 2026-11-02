@@ -187,7 +187,7 @@ def match_government_schemes(
         })
 
     # 1. PMFME (Food Processing & Kitchens)
-    if category_key in FOOD_PROCESSING_CATEGORIES or "bakery" in category_key or "food" in category_key:
+    if category_key in FOOD_PROCESSING_CATEGORIES or "bakery" in category_key:
         add_match(
             "pmfme",
             "Eligible under Ministry of Food Processing Industries (MoFPI) micro food processing and commercial kitchen support.",
@@ -200,8 +200,9 @@ def match_government_schemes(
             "Applicable for micro food kiosks, tea stalls, and street-side operations seeking subsidized working capital.",
         )
 
-    # 3. PMEGP (New Ventures under ₹20L/₹50L)
-    if is_new and startup_cost <= 5_000_000:
+    # 3. PMEGP (New Ventures: up to ₹20L for services, ₹50L for manufacturing)
+    pmegp_cap = 5_000_000 if category_key in FOOD_PROCESSING_CATEGORIES or "bakery" in category_key else 2_000_000
+    if is_new and startup_cost <= pmegp_cap:
         subsidy_rate = "25% to 35%" if is_rural else "15% to 25%"
         area_str = "Rural" if is_rural else "Urban"
         add_match(
@@ -221,10 +222,8 @@ def match_government_schemes(
             tier = "Tarun (₹5 Lakh to ₹10 Lakh)"
         else:
             tier = "Tarun Plus (₹10 Lakh to ₹20 Lakh)"
-        add_match(
-            "mudra",
-            f"Standard collateral-free bank financing suited for setup costs under {tier}.",
-        )
+        reason = f"Collateral-free financing under {tier} (applicable for entrepreneurs with prior successful Tarun repayment)." if "Tarun Plus" in tier else f"Standard collateral-free bank financing suited for setup costs under {tier}."
+        add_match("mudra", reason)
 
     # 5. Stand-Up India (Greenfield capital >= ₹10 Lakh)
     if is_new and startup_cost >= 1_000_000:
