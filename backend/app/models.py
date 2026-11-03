@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import json
+import os
 import uuid
+from collections import OrderedDict
 from datetime import datetime, timezone
+from pathlib import Path
 
 from geoalchemy2 import Geography
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint
@@ -138,7 +142,59 @@ class SimulationRun(Base):
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     duration_ms: Mapped[float | None] = mapped_column(Float, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
-    results: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # Results are ~1 MB of JSON and a remote database can take a minute to send that, so the column is deferred
+    # (listing runs never fetches it) and finished results are kept in memory: a run's results never change.
+    _results: Mapped[dict | None] = mapped_column("results", JSONB, nullable=True, deferred=True)
+
+    @property
+    def results(self) -> dict | None:
+        hit = _RUN_RESULTS.get(self.id) if self.id else None
+        if hit is not None:
+            _RUN_RESULTS.move_to_end(self.id)
+            return hit
+        if self.id and self.status == "succeeded" and (res := _disk_results(self.id)) is not None:
+            _remember_results(self.id, res, persist=False)
+            return res
+        res = self._results
+        if res is not None and self.status == "succeeded":
+            _remember_results(self.id, res)
+        return res
+
+    @results.setter
+    def results(self, value: dict | None) -> None:
+        self._results = value
+        if value is not None and self.id:
+            _remember_results(self.id, value)
+
+    def keep_results(self, value: dict) -> None:
+        """Cache results (memory + disk) without staging the slow DB write; see runs.persist_results_later."""
+        _remember_results(self.id, value)
+
+
+_RUN_RESULTS: OrderedDict[str, dict] = OrderedDict()
+
+
+_RUN_CACHE_DIR = Path(os.getenv("RUN_CACHE_DIR") or Path(__file__).resolve().parent.parent / ".run_cache")
+
+
+def _disk_results(run_id: str) -> dict | None:
+    try:
+        return json.loads((_RUN_CACHE_DIR / f"{run_id}.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def _remember_results(run_id: str, res: dict, keep: int = 16, persist: bool = True) -> None:
+    _RUN_RESULTS[run_id] = res
+    _RUN_RESULTS.move_to_end(run_id)
+    while len(_RUN_RESULTS) > keep:
+        _RUN_RESULTS.popitem(last=False)
+    if persist:  # survives restarts; best effort (read-only or serverless disks just skip it)
+        try:
+            _RUN_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            (_RUN_CACHE_DIR / f"{run_id}.json").write_text(json.dumps(res, default=str), encoding="utf-8")
+        except (OSError, TypeError, ValueError):
+            pass
 
 
 class ActualOutcome(TimestampMixin, Base):

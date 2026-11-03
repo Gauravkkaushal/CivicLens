@@ -994,7 +994,8 @@ function VoiceDockInner() {
 
           {err && <p className="mx-5 mt-2 rounded-xl bg-warn/10 px-3 py-2 text-xs text-warn">{err}</p>}
 
-          <div className="flex flex-wrap gap-1.5 px-5 pt-3">
+          {/* starter prompts only: once the user has said something, the conversation carries on by itself */}
+          {!turns.some((t) => t.who === "you") && <div className="flex flex-wrap gap-1.5 px-5 pt-3">
             {(projectId ? SUGGESTIONS.project : SUGGESTIONS.general).map((s) => (
               <button
                 key={s}
@@ -1004,7 +1005,7 @@ function VoiceDockInner() {
                 {s}
               </button>
             ))}
-          </div>
+          </div>}
 
           <div className="mt-4 flex items-center gap-2 border-t border-black/[0.06] px-3 py-3">
             {typing ? (

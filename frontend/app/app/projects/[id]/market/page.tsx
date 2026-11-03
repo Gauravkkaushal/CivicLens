@@ -80,18 +80,21 @@ export default function MarketPage() {
       try {
         const s = await job;
         if (s.status === "failed") setError(`Market data could not be loaded: ${s.errors.map((e) => e.message).join("; ") || "unknown error"}`);
-        await load();
-        await reload();
-        setDirty(true);
         // First load for a new project: run the baseline straight away so the live market is ready.
-        if (s.status !== "failed" && baseline && !baseline.latest_run) {
-          setAutoRunning(true);
+        // Start it now, alongside the map/project reloads, instead of after them.
+        const runJob = s.status !== "failed" && baseline && !baseline.latest_run
+          ? api<Run>(`/scenarios/${baseline.id}/runs`, { method: "POST" })
+          : null;
+        if (runJob) setAutoRunning(true);
+        await Promise.all([load(), reload()]);
+        setDirty(true);
+        if (runJob) {
           try {
-            const r = await api<Run>(`/scenarios/${baseline.id}/runs`, { method: "POST" });
+            const r = await runJob;
             setBaseResult(r.results || null);
             setDirty(false);
             setLiveReady(true);
-            await reload();
+            void reload(); // picks up latest_run in the background
           } catch {
             /* the lab shows the reason */
           } finally {
@@ -136,6 +139,10 @@ export default function MarketPage() {
   }
 
   const snap = data?.snapshot;
+  // Provider failures (busy mirrors, fallbacks) are developer diagnostics: log them, don't show them in the panel.
+  useEffect(() => {
+    snap?.errors.forEach((e) => console.warn(`[market data] ${e.source}: ${e.message}${e.fallback ? ` (fell back to ${e.fallback})` : ""}`));
+  }, [snap?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const comps = data?.competitors || [];
   const selected = comps.find((c) => c.id === sel) || null;
   const modelComp = baseResult?.competitors.find((c) => c.id === sel);
@@ -308,12 +315,6 @@ export default function MarketPage() {
                     <Badge tone={snap.status === "complete" ? "ok" : snap.status === "partial" ? "warn" : "danger"}>{snap.status}</Badge>
                   </div>
                   {p.is_demo && <Notice tone="warn">This is the demo dataset. Population and competitors are synthetic and illustrative.</Notice>}
-                  {snap.errors.map((e, i) => (
-                    <Notice key={i} tone="warn">
-                      <b className="capitalize">{e.source}</b>: {e.message}
-                      {e.fallback && <> — fell back to <b>{e.fallback}</b>.</>}
-                    </Notice>
-                  ))}
                   <div className="rounded-md border border-black/[0.07] p-3">
                     <div className="mb-2 flex items-center justify-between text-xs">
                       <span className="font-medium text-ink-200">Catchment population</span>

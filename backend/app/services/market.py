@@ -13,7 +13,7 @@ from ..config import get_settings
 from ..categories.taxonomy import ACTIVITY_KINDS, CONTEXT_FILTERS, classify_poi
 from ..engine.geo import circle_polygon, haversine_km, hex_grid, km_to_deg_lat, km_to_deg_lng, points_in_polygon
 from ..providers import osm, population, routing
-from ..providers.http import Cache, ProviderError
+from ..providers.http import Cache, ProviderError, mark_down
 from ..providers.registry import provenance
 
 log = logging.getLogger("civiclens.market")
@@ -164,9 +164,11 @@ async def _route(zones: list[dict], comps: list[dict], lat: float, lng: float, c
     # one table request per profile: origins + destinations must fit the server's coordinate limit
     origins, idx = route_origins(zones, max(1, get_settings().routing_max_coords - len(dests)))
     try:
-        tab, prov = await asyncio.wait_for(routing.route_matrix([tuple(o) for o in origins], [(a, b) for _, a, b in dests], cache), 60)
+        tab, prov = await asyncio.wait_for(routing.route_matrix([tuple(o) for o in origins], [(a, b) for _, a, b in dests], cache), 4)
     except Exception as e:  # routing is an enrichment: never lose the snapshot over it
-        msg = e.message if isinstance(e, ProviderError) else ("no response within 60 s" if isinstance(e, asyncio.TimeoutError) else f"{type(e).__name__}: {e}")
+        if isinstance(e, asyncio.TimeoutError):
+            mark_down("routing")  # throttled public server: use straight-line distances for a while
+        msg = e.message if isinstance(e, ProviderError) else ("no response within 4 s" if isinstance(e, asyncio.TimeoutError) else f"{type(e).__name__}: {e}")
         errors.append({"source": "routing", "message": msg[:300], "fallback": "straight-line distance x circuity"})
         return None
     sources.append({**prov, "layer": "routing", "detail": f"{prov.get('detail', '')}; {len(zones)} zones grouped into {len(origins)} routed origins".strip("; ")})
@@ -200,14 +202,15 @@ async def build_snapshot(*, lat: float, lng: float, catchment: dict, category: d
         terms = [w for w in [category.get("query"), category.get("label")] if w]
         terms = [t.split("/")[0].strip() for t in terms]
         return await osm.fetch_competitors(lat, lng, comp_radius_m, category.get("filters") or [], cache, terms=terms,
-                                           timeout_s=30 if get_settings().serverless else 40)
+                                           timeout_s=6)
 
     async def bld_task():
-        return await osm.fetch_buildings(lat, lng, radius_m, cache)
+        return await osm.fetch_buildings(lat, lng, radius_m, cache, timeout_s=8)
 
     async def ctx_task():
         # Context POIs feed the factor engine (schools, transit, offices…) and the visitor-demand proxy.
-        return await osm.fetch_pois(lat, lng, radius_m, list(CONTEXT_FILTERS), cache, limit=6000, timeout_s=80)
+        return await osm.fetch_pois(lat, lng, radius_m, list(CONTEXT_FILTERS), cache, limit=3000, fallback=True,
+                                    timeout_s=6)
 
     async def agesex_task():
         return await population.worldpop_age_sex(polygon, cache)
@@ -227,11 +230,9 @@ async def build_snapshot(*, lat: float, lng: float, catchment: dict, category: d
             raise ProviderError(what, f"no response within {int(seconds)} s") from e
 
     # Layers run concurrently; each races the Overpass mirrors. Competitors also fall back to Photon/Nominatim.
-    k = 0.55 if get_settings().serverless else 1.0  # serverless requests must finish well inside the platform limit
-    kp = 0.85 if get_settings().serverless else 1.0  # WorldPop is slow but it is the official population figure: give it longer
-    results = await asyncio.gather(bounded(comp_task(), 95 * k, "overpass"), bounded(bld_task(), 110 * k, "overpass"),
-                                   bounded(ctx_task(), 110 * k, "overpass"), bounded(pop_task(), 100 * kp, "worldpop"),
-                                   bounded(agesex_task(), 100 * kp, "worldpop"), bounded(admin_task(), 30, "nominatim"),
+    results = await asyncio.gather(bounded(comp_task(), 12, "overpass"), bounded(bld_task(), 10, "overpass"),
+                                   bounded(ctx_task(), 15, "overpass"), bounded(pop_task(), 12, "worldpop"),
+                                   bounded(agesex_task(), 10, "worldpop"), bounded(admin_task(), 8, "nominatim"),
                                    return_exceptions=True)
     names = ["competitors", "buildings", "context", "population", "age_sex", "admin"]
     vals = {}

@@ -42,10 +42,7 @@ def migrate_once() -> None:
         log.error("auto-migrate failed: %s", e)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    get_settings()
-    migrate_once()
+def _recover_stale_snapshots() -> None:
     try:
         from .db import session_factory
         from .services.runs import recover_stale_loading_snapshots
@@ -53,7 +50,20 @@ async def lifespan(app: FastAPI):
             recover_stale_loading_snapshots(db)
     except Exception as e:
         log.warning("Could not run recover_stale_loading_snapshots on startup: %s", e)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    import asyncio
+    get_settings()
+    migrate_once()
+    # off the startup path: a remote DB round-trip shouldn't delay readiness (start_refresh re-runs it anyway)
+    recovery = asyncio.create_task(asyncio.to_thread(_recover_stale_snapshots))
+    from .providers.osm import watch_overpass_mirrors
+    watcher = asyncio.create_task(watch_overpass_mirrors())
     yield
+    recovery.cancel()
+    watcher.cancel()
     await close_client()
 
 

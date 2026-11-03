@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 import httpx
 
 from ..config import get_settings
-from .http import Cache, ProviderError, cache_key, client, nominatim_throttle
+from .http import Cache, ProviderError, cache_key, client, is_down, mark_down, mark_up, nominatim_throttle
 from .registry import provenance
 
 log = logging.getLogger("civiclens.osm")
@@ -44,7 +44,7 @@ async def geocode(q: str, limit: int = 6, cache: Cache | None = None, country_co
     if country_codes:
         params["countrycodes"] = country_codes
     key = cache_key("nominatim", params)
-    if cache and (hit := cache.get(key)):
+    if cache and (hit := await cache.aget(key)):
         payload, fetched = hit
         return payload["results"], provenance("osm_nominatim", retrieved_at=fetched, cached=True)
     await nominatim_throttle()
@@ -55,7 +55,7 @@ async def geocode(q: str, limit: int = 6, cache: Cache | None = None, country_co
         raise ProviderError("nominatim", f"search failed: {e}") from e
     results = parse_nominatim(r.json())
     if cache:
-        cache.put(key, "nominatim", {"results": results}, timedelta(days=14))
+        await cache.aput(key, "nominatim", {"results": results}, timedelta(days=14))
     return results, provenance("osm_nominatim")
 
 
@@ -63,7 +63,7 @@ async def reverse(lat: float, lng: float, cache: Cache | None = None) -> str:
     s = get_settings()
     params = {"lat": round(lat, 5), "lon": round(lng, 5), "format": "jsonv2", "zoom": 17}
     key = cache_key("nominatim_rev", params)
-    if cache and (hit := cache.get(key)):
+    if cache and (hit := await cache.aget(key)):
         return hit[0].get("display_name", "")
     await nominatim_throttle()
     try:
@@ -73,7 +73,7 @@ async def reverse(lat: float, lng: float, cache: Cache | None = None) -> str:
     except (httpx.HTTPError, ValueError):
         return ""
     if cache:
-        cache.put(key, "nominatim_rev", {"display_name": name}, timedelta(days=30))
+        await cache.aput(key, "nominatim_rev", {"display_name": name}, timedelta(days=30))
     return name
 
 
@@ -83,7 +83,7 @@ async def reverse_admin(lat: float, lng: float, cache: Cache | None = None) -> t
     s = get_settings()
     params = {"lat": round(lat, 4), "lon": round(lng, 4), "format": "jsonv2", "zoom": 14, "addressdetails": 1}
     key = cache_key("nominatim_admin", params)
-    if cache and (hit := cache.get(key)):
+    if cache and (hit := await cache.aget(key)):
         return hit[0], provenance("osm_nominatim", retrieved_at=hit[1], cached=True, detail="State and settlement type")
     await nominatim_throttle()
     try:
@@ -102,7 +102,7 @@ async def reverse_admin(lat: float, lng: float, cache: Cache | None = None) -> t
            "country_code": (addr.get("country_code") or "").upper(), "settlement": place,
            "place_name": addr.get("city") or addr.get("town") or addr.get("village") or addr.get("suburb")}
     if cache:
-        cache.put(key, "nominatim_admin", out, timedelta(days=60))
+        await cache.aput(key, "nominatim_admin", out, timedelta(days=60))
     return out, provenance("osm_nominatim", detail="State and settlement type")
 
 
@@ -154,12 +154,18 @@ def parse_building_centers(data: dict) -> list[tuple[float, float]]:
 
 async def _overpass_one(url: str, query: str, timeout_s: float) -> dict:
     host = url.split("/")[2]
+    if is_down(host):
+        raise ProviderError("overpass", f"{host}: skipped (failed recently)")
     try:
         r = await client().post(url, data={"data": query}, timeout=httpx.Timeout(timeout_s, connect=3.0))
     except httpx.HTTPError as e:
+        mark_down(host)
         raise ProviderError("overpass", f"{host}: {type(e).__name__}") from e
     if r.status_code != 200:
+        if r.status_code in (429, 502, 503, 504):
+            mark_down(host)
         raise ProviderError("overpass", f"{host}: HTTP {r.status_code}")
+    mark_up(host)
     try:
         data = r.json()
     except ValueError as e:
@@ -171,6 +177,15 @@ async def _overpass_one(url: str, query: str, timeout_s: float) -> dict:
     return data
 
 
+async def watch_overpass_mirrors(every_s: float = 300.0) -> None:
+    """Background health probe: a one-node query per mirror keeps the circuit breaker current,
+    so a user's refresh never spends its time budget discovering that mirrors are down."""
+    probe = "[out:json][timeout:5];node(1);out ids;"
+    while True:
+        await asyncio.gather(*(_overpass_one(u, probe, 6.0) for u in get_settings().overpass_urls), return_exceptions=True)
+        await asyncio.sleep(every_s)
+
+
 async def overpass(query: str, cache: Cache | None = None, ttl: timedelta = timedelta(hours=12), tag: str = "overpass",
                    timeout_s: float = 6.0, rounds: int = 1) -> tuple[dict, datetime, bool, str]:
     """Race the configured Overpass mirrors; the first valid answer wins and the others are cancelled.
@@ -180,26 +195,33 @@ async def overpass(query: str, cache: Cache | None = None, ttl: timedelta = time
     Returns (data, fetched_at, cached, endpoint)."""
     s = get_settings()
     key = cache_key(tag, {"q": query})
-    if cache and (hit := cache.get(key)):
+    if cache and (hit := await cache.aget(key)):
         return hit[0], hit[1], True, "cache"
     errors: list[str] = []
     empty: tuple[dict, str] | None = None
     for rnd in range(rounds):
         tasks = [asyncio.create_task(_overpass_one(u, query, timeout_s)) for u in s.overpass_urls]
         try:
-            for fut in asyncio.as_completed(tasks):
+            # hard deadline for the whole race: per-request httpx timeouts add up (connect + each read)
+            for fut in asyncio.as_completed(tasks, timeout=timeout_s + 1):
                 try:
                     data = await fut
                 except ProviderError as e:
                     errors.append(e.message)
                     continue
+                except asyncio.TimeoutError:
+                    for u, t in zip(s.overpass_urls, tasks):
+                        if not t.done():
+                            mark_down(u.split("/")[2])
+                    errors.append(f"no mirror answered within {int(timeout_s)} s")
+                    break
                 url = data.pop("_endpoint", "")
                 if not data.get("elements") and empty is None:
                     # An empty answer may be a stale or lagging mirror: keep waiting for the others.
                     empty = (data, url)
                     continue
                 if cache:
-                    cache.put(key, tag, data, ttl)
+                    await cache.aput(key, tag, data, ttl)
                 return data, datetime.now(timezone.utc), False, url
         finally:
             for t in tasks:
@@ -258,7 +280,7 @@ async def photon_pois(lat: float, lng: float, radius_m: int, filters: list[str],
         if tag:
             params.append(("osm_tag", tag))
         try:
-            r = await client().get("https://photon.komoot.io/api/", params=params, timeout=httpx.Timeout(15.0, connect=6.0))
+            r = await client().get("https://photon.komoot.io/api/", params=params, timeout=httpx.Timeout(6.0, connect=4.0))
             if r.status_code != 200:
                 return []
             feats = r.json().get("features", [])
@@ -343,7 +365,7 @@ async def fetch_pois(lat, lng, radius_m, filters, cache=None, limit: int = 400, 
     Photon / Nominatim when every Overpass mirror is down, so a busy mirror never empties the market."""
     if not filters:
         return [], provenance("osm_overpass", status="skipped", detail="No category filters.")
-    q = build_poi_query(lat, lng, radius_m, filters, timeout=int(timeout_s) - 5, limit=limit)
+    q = build_poi_query(lat, lng, radius_m, filters, timeout=max(5, int(timeout_s) - 2), limit=limit)
     try:
         data, fetched, cached, endpoint = await overpass(q, cache, timeout_s=timeout_s, rounds=1 if fallback else 2)
     except ProviderError as e:
@@ -351,7 +373,7 @@ async def fetch_pois(lat, lng, radius_m, filters, cache=None, limit: int = 400, 
             raise
         log.warning("overpass failed (%s); trying Photon/Nominatim", e.message)
         fkey = cache_key("osm_fallback", {"q": q})
-        if cache and (hit := cache.get(fkey)):
+        if cache and (hit := await cache.aget(fkey)):
             pois = hit[0]["pois"]
             return pois, provenance("osm_photon", retrieved_at=hit[1], cached=True,
                                     detail=f"{len(pois)} features (Overpass busy; served from Photon/Nominatim index)")
@@ -366,7 +388,7 @@ async def fetch_pois(lat, lng, radius_m, filters, cache=None, limit: int = 400, 
         if not pois:
             raise ProviderError("overpass", f"{e.message}; fallbacks returned nothing") from e
         if cache:
-            cache.put(fkey, "osm_fallback", {"pois": pois}, timedelta(hours=12))
+            await cache.aput(fkey, "osm_fallback", {"pois": pois}, timedelta(hours=12))
         return pois, provenance(src, detail=f"{len(pois)} features matched within {radius_m} m (Overpass mirrors busy: "
                                             f"same OpenStreetMap data via the {'Photon' if src == 'osm_photon' else 'Nominatim'} index; "
                                             "edit dates unavailable)")
@@ -377,9 +399,9 @@ async def fetch_pois(lat, lng, radius_m, filters, cache=None, limit: int = 400, 
                             detail=f"{len(pois)} features matched {len(filters)} tag filter(s) within {radius_m} m (via {host})")
 
 
-async def fetch_buildings(lat, lng, radius_m, cache=None) -> tuple[list[tuple[float, float]], dict]:
-    data, fetched, cached, _ = await overpass(build_buildings_query(lat, lng, radius_m, timeout=90), cache, ttl=timedelta(days=3),
-                                              tag="overpass_bld", timeout_s=95, rounds=1)
+async def fetch_buildings(lat, lng, radius_m, cache=None, timeout_s: float = 15.0) -> tuple[list[tuple[float, float]], dict]:
+    data, fetched, cached, _ = await overpass(build_buildings_query(lat, lng, radius_m, timeout=int(timeout_s)), cache, ttl=timedelta(days=3),
+                                              tag="overpass_bld", timeout_s=timeout_s, rounds=1)
     pts = parse_building_centers(data)
     osm_base = data.get("osm3s", {}).get("timestamp_osm_base")
     return pts, provenance("osm_overpass", retrieved_at=fetched, source_updated_at=osm_base, cached=cached,
@@ -410,9 +432,9 @@ async def fetch_competitors(lat: float, lng: float, radius_m: int, filters: list
     when both are thin. All three serve OpenStreetMap data, so the union is still one licensed, attributable source."""
     if not filters:
         return [], provenance("osm_overpass", status="skipped", detail="No category filters.")
-    q = build_poi_query(lat, lng, radius_m, filters, timeout=int(timeout_s) - 5, limit=limit)
+    q = build_poi_query(lat, lng, radius_m, filters, timeout=max(5, int(timeout_s) - 2), limit=limit)
     key = cache_key("osm_merged_v4", {"q": q, "t": terms or [], "fsq": bool(get_settings().fsq_api_key)})
-    if cache and (hit := cache.get(key)):
+    if cache and (hit := await cache.aget(key)):
         pois = hit[0]["pois"]
         prov = provenance("osm_overpass", retrieved_at=hit[1], cached=True, source_updated_at=hit[0].get("osm_base"),
                           detail=hit[0].get("detail") or f"{len(pois)} features")
@@ -468,7 +490,7 @@ async def fetch_competitors(lat: float, lng: float, radius_m: int, filters: list
               + (f" + {fq_added} more from Foursquare Places ({len(fq_pois)} found, {len(fq_pois) - fq_added} already in OSM)" if fq_pois else ""))
     fq_detail = f"{len(fq_pois)} places found, {fq_added} not in OpenStreetMap added" if fq_pois else ""
     if cache and merged:
-        cache.put(key, "osm_merged", {"pois": merged, "osm_base": osm_base, "detail": detail, "fq": fq_detail}, timedelta(hours=12))
+        await cache.aput(key, "osm_merged", {"pois": merged, "osm_base": osm_base, "detail": detail, "fq": fq_detail}, timedelta(hours=12))
     prov = provenance("osm_overpass", source_updated_at=osm_base, detail=detail)
     if fq_detail:
         prov["also"] = [provenance("foursquare", detail=fq_detail)]

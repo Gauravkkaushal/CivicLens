@@ -22,9 +22,12 @@ def get_engine():
         s = get_settings()
         if s.serverless:
             # short-lived instances behind a connection pooler: no client-side pool, no server-side prepared statements
-            _engine = create_engine(s.sqlalchemy_url, poolclass=NullPool, connect_args={"prepare_threshold": None})
+            _engine = create_engine(s.sqlalchemy_url, poolclass=NullPool,
+                                    connect_args={"prepare_threshold": None, "connect_timeout": 30})
         else:
-            _engine = create_engine(s.sqlalchemy_url, pool_pre_ping=True, pool_recycle=300, pool_size=10, max_overflow=10)
+            # small pool + connect timeout: hosted poolers cap clients, and a full pooler must fail fast, not hang
+            _engine = create_engine(s.sqlalchemy_url, pool_pre_ping=True, pool_recycle=1800, pool_size=5, max_overflow=5,
+                                    pool_timeout=15, connect_args={"connect_timeout": 30})
         _SessionLocal = sessionmaker(bind=_engine, autoflush=False, expire_on_commit=False)
     return _engine
 

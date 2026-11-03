@@ -5,11 +5,12 @@ import asyncio
 import hashlib
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
 from geoalchemy2.functions import ST_DWithin, ST_GeogFromText
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from ..categories.archetypes import get_archetype
@@ -299,6 +300,7 @@ def execute_run(db: Session, project: Project, scenario: Scenario) -> Simulation
     db.add(run)
     db.commit()
     log.info("simulation start run=%s scenario=%s model=%s zones=%d comps=%d", run.id, scenario.id, em.MODEL_VERSION, len(zones), len(ecomps))
+    persist = None
     try:
         if not zones:
             raise SimulationError("Population data is unavailable for this catchment. Enter an approximate catchment population on the market page and reload.")
@@ -337,7 +339,12 @@ def execute_run(db: Session, project: Project, scenario: Scenario) -> Simulation
             "field": field.public(),
             "failed_layers": sorted({e.get("source") for e in (snap.errors or []) if e.get("source")}),
         }
-        run.results, run.status = res, "succeeded"
+        if get_settings().serverless:  # no life after the response there: write it now
+            run.results = res
+        else:
+            run.keep_results(res)
+            persist = res
+        run.status = "succeeded"
         run.duration_ms = res.get("duration_ms")
     except SimulationError as e:
         run.status, run.error = "failed", str(e)
@@ -346,8 +353,25 @@ def execute_run(db: Session, project: Project, scenario: Scenario) -> Simulation
         run.status, run.error = "failed", f"Internal error: {type(e).__name__}"
     run.finished_at = utcnow()
     db.commit()
+    if persist is not None:
+        persist_results_later(run.id, persist)
     log.info("simulation end run=%s status=%s duration_ms=%s", run.id, run.status, run.duration_ms)
     return run
+
+
+_persist_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="run-results")
+
+
+def persist_results_later(run_id: str, results: dict) -> None:
+    """Write a run's ~1 MB results to the database off the request path (they are already served from cache)."""
+    def write():
+        try:
+            with session_factory()() as db:
+                db.execute(update(SimulationRun.__table__).where(SimulationRun.__table__.c.id == run_id).values(results=results))
+                db.commit()
+        except Exception:
+            log.exception("could not persist results for run %s", run_id)
+    _persist_pool.submit(write)
 
 
 def latest_runs(db: Session, project: Project) -> dict[str, SimulationRun]:

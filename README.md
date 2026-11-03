@@ -143,7 +143,7 @@ python -m venv .venv
 pip install -r requirements-dev.txt
 export DATABASE_URL=postgresql://civiclens:civiclens@localhost:5432/civiclens
 alembic upgrade head
-uvicorn app.main:app --reload             # Swagger UI at http://localhost:8000/docs
+python dev.py                             # auto-reload dev server; Swagger UI at http://localhost:8000/docs
 
 # 3. Setup and run Frontend
 cd ../frontend

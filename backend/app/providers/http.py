@@ -27,6 +27,23 @@ class ProviderError(RuntimeError):
         self.message = message
 
 
+_down_until: dict[str, float] = {}
+
+
+def is_down(name: str) -> bool:
+    """Circuit breaker: a service that just timed out is skipped for a while instead of being waited on again."""
+    return time.monotonic() < _down_until.get(name, 0.0)
+
+
+def mark_down(name: str, seconds: float = 600.0) -> None:
+    _down_until[name] = time.monotonic() + seconds
+    log.warning("%s marked down for %d s", name, seconds)
+
+
+def mark_up(name: str) -> None:
+    _down_until.pop(name, None)
+
+
 def _lock(name: str) -> asyncio.Lock:
     """Per-event-loop lock (asyncio primitives cannot be shared across loops)."""
     key = (id(asyncio.get_running_loop()), name)
@@ -79,6 +96,7 @@ def cache_key(provider: str, payload: dict) -> str:
 
 
 _MEM_CACHE: dict[str, tuple[dict, datetime, datetime]] = {}
+_pending_writes: set[asyncio.Task] = set()
 
 class Cache:
     """Fast in-memory + database cache over the provider_cache table."""
@@ -108,6 +126,34 @@ class Cache:
         except Exception as e:
             log.warning("cache read failed: %s", e)
         return None
+
+    # Async callers must use these: the database may be a remote round-trip away, and a sync query
+    # inside a coroutine freezes the event loop, so every other provider call times out meanwhile.
+    async def aget(self, key: str) -> tuple[dict, datetime] | None:
+        hit = _MEM_CACHE.get(key)
+        if hit and hit[2] > datetime.now(timezone.utc):
+            return hit[0], hit[1]
+        if not self.session_factory:
+            return None
+        # a cold pool means a fresh connection (seconds on a far-away DB): treat a slow read as a miss
+        # rather than stall the provider call; the read still finishes and fills the memory cache
+        read = asyncio.ensure_future(asyncio.to_thread(self.get, key))
+        try:
+            return await asyncio.wait_for(asyncio.shield(read), 1.5)
+        except asyncio.TimeoutError:
+            _pending_writes.add(read)
+            read.add_done_callback(_pending_writes.discard)
+            return None
+
+    async def aput(self, key: str, provider: str, payload: dict, ttl: timedelta) -> None:
+        if not self.session_factory:
+            self.put(key, provider, payload, ttl)
+            return
+        now = datetime.now(timezone.utc)
+        _MEM_CACHE[key] = (payload, now, now + ttl)
+        task = asyncio.create_task(asyncio.to_thread(self.put, key, provider, payload, ttl))  # write behind, don't wait
+        _pending_writes.add(task)
+        task.add_done_callback(_pending_writes.discard)
 
     def put(self, key: str, provider: str, payload: dict, ttl: timedelta) -> None:
         now = datetime.now(timezone.utc)

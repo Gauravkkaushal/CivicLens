@@ -15,7 +15,7 @@ export async function waitForSnapshot(projectId: string, snapshotId: string, onT
     const secs = Math.round((Date.now() - t0) / 1000);
     onTick?.(secs);
     if (secs > 200) return { ...s, status: "failed", errors: [{ source: "job", message: "Still loading after 3 minutes. Check again shortly." }] };
-    await new Promise((r) => setTimeout(r, 2500));
+    await new Promise((r) => setTimeout(r, 1000));
   }
 }
 

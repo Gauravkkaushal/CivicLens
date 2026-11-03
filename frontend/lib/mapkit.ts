@@ -28,12 +28,14 @@ export const C = {
 
 export async function pickStyle(): Promise<string> {
   try {
-    const r = await fetch(STYLE_DARK);
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 1500);
+    const r = await fetch(STYLE_DARK, { signal: ctrl.signal, method: "HEAD" }).finally(() => clearTimeout(t));
     if (r.ok) return STYLE_DARK;
   } catch {
-    /* offline */
+    /* offline or timeout */
   }
-  return STYLE_FALLBACK;
+  return STYLE_DARK;
 }
 
 function safe(fn: () => void) {

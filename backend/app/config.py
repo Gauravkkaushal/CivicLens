@@ -23,6 +23,21 @@ def _list(v: str | None, default: list[str]) -> list[str]:
     return [x.strip() for x in v.split(",") if x.strip()]
 
 
+_OVERPASS_DEFAULT = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+]
+# Regional extracts (France, Switzerland): they answer fast with zero elements for India, which reads as "no competitors".
+_OVERPASS_REGIONAL = ("overpass.openstreetmap.fr", "overpass.osm.ch")
+
+
+def _overpass_urls(v: str | None) -> list[str]:
+    urls = [u for u in _list(v, _OVERPASS_DEFAULT) if not any(h in u for h in _OVERPASS_REGIONAL)]
+    return urls or list(_OVERPASS_DEFAULT)
+
+
 @dataclass(frozen=True)
 class Settings:
     app_env: str = field(default_factory=lambda: os.getenv("APP_ENV", "development"))
@@ -33,12 +48,7 @@ class Settings:
     cors_origins: list[str] = field(default_factory=lambda: _list(os.getenv("CORS_ORIGINS"), ["http://localhost:3000"]))
     contact_email: str = field(default_factory=lambda: os.getenv("CONTACT_EMAIL", ""))
     nominatim_url: str = field(default_factory=lambda: os.getenv("NOMINATIM_URL", "https://nominatim.openstreetmap.org"))
-    overpass_urls: list[str] = field(default_factory=lambda: _list(os.getenv("OVERPASS_URLS"), [
-        "https://overpass-api.de/api/interpreter",
-        "https://overpass.private.coffee/api/interpreter",
-        "https://overpass.kumi.systems/api/interpreter",
-        "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
-    ]))
+    overpass_urls: list[str] = field(default_factory=lambda: _overpass_urls(os.getenv("OVERPASS_URLS")))
     worldpop_url: str = field(default_factory=lambda: os.getenv("WORLDPOP_URL", "https://api.worldpop.org/v1"))
     worldpop_year: int = field(default_factory=lambda: int(os.getenv("WORLDPOP_YEAR", "2020")))
     fsq_api_key: str = field(default_factory=lambda: os.getenv("FSQ_API_KEY", ""))

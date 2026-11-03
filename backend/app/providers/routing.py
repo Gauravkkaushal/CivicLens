@@ -14,7 +14,7 @@ import httpx
 import numpy as np
 
 from ..config import get_settings
-from .http import Cache, ProviderError, cache_key, client
+from .http import Cache, ProviderError, cache_key, client, is_down, mark_down
 from .registry import provenance
 
 PROFILES = {"foot": "routed-foot", "car": "routed-car"}
@@ -51,19 +51,23 @@ async def route_matrix(zones: list[tuple[float, float]], dests: list[tuple[float
     """Zone x destination road distance (km) and time (min), on foot and by car. Unroutable pairs are None."""
     s = get_settings()
     key = cache_key("routing", {"z": [(round(a, 5), round(b, 5)) for a, b in zones], "d": [(round(a, 5), round(b, 5)) for a, b in dests]})
-    if cache and (hit := cache.get(key)):
+    if cache and (hit := await cache.aget(key)):
         return hit[0], provenance("osrm", retrieved_at=hit[1], cached=True, detail=f"{len(zones)} zones x {len(dests)} destinations")
+    if is_down("routing"):
+        raise ProviderError("routing", "skipped (slow or failing recently)")
     out: dict = {}
     try:
-        for prof, path in PROFILES.items():
-            km, mins = await _table(f"{s.routing_url.rstrip('/')}/{path}", zones, dests, s.routing_max_coords)
+        # foot and car are separate OSRM backends, so query them together; _table paces requests within each
+        tables = await asyncio.gather(*(_table(f"{s.routing_url.rstrip('/')}/{path}", zones, dests, s.routing_max_coords)
+                                        for path in PROFILES.values()))
+        for prof, (km, mins) in zip(PROFILES, tables):
             out[prof] = {"km": np.where(np.isnan(km), None, np.round(km, 3)).tolist(),
                          "min": np.where(np.isnan(mins), None, np.round(mins, 2)).tolist()}
-            await asyncio.sleep(1.0)  # public servers: about one request per second
     except (httpx.HTTPError, KeyError, ValueError, TypeError) as e:
+        mark_down("routing")
         raise ProviderError("routing", f"OSRM table failed: {type(e).__name__} {e}".strip()) from e
     if cache:
-        cache.put(key, "routing", out, timedelta(days=30))
+        await cache.aput(key, "routing", out, timedelta(days=30))
     return out, provenance("osrm", detail=f"Road-network distance and time, {len(zones)} zones x {len(dests)} destinations, on foot and by car")
 
 
